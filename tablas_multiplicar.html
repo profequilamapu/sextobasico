@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🚀 Tablas de Multiplicar - Flashcards</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Trebuchet MS', 'Comic Sans MS', system-ui, sans-serif;
+    background: linear-gradient(135deg, #ff9a8b 0%, #ff6a88 25%, #a18cd1 55%, #6dd5ed 80%, #43e97b 100%);
+    background-size: 300% 300%;
+    animation: bgFlow 18s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: #1a1a3a;
+  }
+
+  @keyframes bgFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Burbujas decorativas de fondo */
+  .bubble {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.35;
+    filter: blur(2px);
+    animation: floatUp 14s linear infinite;
+    z-index: 0;
+  }
+  .bubble:nth-child(1) { width: 80px;  height: 80px;  background:#fff37a; left: 8%;  bottom:-100px; animation-delay: 0s;  }
+  .bubble:nth-child(2) { width: 50px;  height: 50px;  background:#7afcff; left: 25%; bottom:-100px; animation-delay: 3s;  }
+  .bubble:nth-child(3) { width: 110px; height: 110px; background:#ff7ad9; left: 55%; bottom:-100px; animation-delay: 6s;  }
+  .bubble:nth-child(4) { width: 60px;  height: 60px;  background:#7aff9c; left: 75%; bottom:-100px; animation-delay: 1.5s;}
+  .bubble:nth-child(5) { width: 90px;  height: 90px;  background:#ffae7a; left: 88%; bottom:-100px; animation-delay: 8s;  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0)      scale(1);   opacity: 0;   }
+    10%  { opacity: 0.4; }
+    100% { transform: translateY(-110vh) scale(1.3); opacity: 0;   }
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 28px;
+    padding: 22px 22px 26px;
+    box-shadow: 0 20px 60px rgba(40, 0, 80, 0.25), 0 0 0 4px rgba(255,255,255,0.5) inset;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ----- Header / Stats ----- */
+  .header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .title {
+    font-size: clamp(1.3rem, 5vw, 1.7rem);
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #ff3d7f, #6a4cff, #00b4d8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    color: #555;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  .progress-line {
+    margin: 14px 0 10px;
+    background: #eef0f7;
+    height: 14px;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #43e97b, #38f9d7);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.2,.9,.3,1.2);
+    box-shadow: 0 0 10px rgba(67,233,123,0.6);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: #fff;
+    border: 3px solid transparent;
+    border-radius: 16px;
+    padding: 8px 4px;
+    text-align: center;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    transition: transform 0.25s;
+  }
+  .stat:hover { transform: translateY(-2px); }
+  .stat-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .stat-value {
+    font-size: 1.15rem;
+    font-weight: 900;
+    margin-top: 2px;
+    color: #1a1a3a;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    color: #777;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .stat.aciertos { background: linear-gradient(135deg, #d4fce0, #a7f3c8); }
+  .stat.errores  { background: linear-gradient(135deg, #ffe0e0, #ffb3b3); }
+  .stat.racha    { background: linear-gradient(135deg, #fff3c4, #ffe066); }
+  .stat.logro    { background: linear-gradient(135deg, #d4e8ff, #a4c8ff); }
+
+  /* ----- Flashcard ----- */
+  .card {
+    background: linear-gradient(160deg, #ffffff 0%, #f6f7ff 100%);
+    border-radius: 24px;
+    padding: 28px 18px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(106, 76, 255, 0.18), 0 0 0 6px rgba(255, 61, 127, 0.08);
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+  .card.flip-in { animation: flipIn 0.5s ease; }
+  @keyframes flipIn {
+    from { transform: rotateY(-90deg) scale(0.9); opacity: 0; }
+    to   { transform: rotateY(0)      scale(1);   opacity: 1; }
+  }
+
+  .ex-counter {
+    font-size: 0.85rem;
+    color: #6a4cff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .equation {
+    font-size: clamp(2.4rem, 9vw, 3.4rem);
+    font-weight: 900;
+    color: #1a1a3a;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(255,61,127,0.15);
+  }
+  .equation .op { color: #ff3d7f; margin: 0 6px; }
+  .equation .qmark { color: #6a4cff; }
+
+  /* ----- Input + botones ----- */
+  .answer-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .answer-input {
+    flex: 1 1 140px;
+    min-width: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-align: center;
+    padding: 14px 10px;
+    border: 4px solid #6a4cff;
+    border-radius: 16px;
+    outline: none;
+    background: #fff;
+    color: #1a1a3a;
+    transition: all 0.2s;
+    -moz-appearance: textfield;
+  }
+  .answer-input::-webkit-outer-spin-button,
+  .answer-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .answer-input:focus {
+    border-color: #ff3d7f;
+    box-shadow: 0 0 0 4px rgba(255,61,127,0.2);
+    transform: scale(1.02);
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 900;
+    padding: 14px 22px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #ff3d7f, #6a4cff);
+    box-shadow: 0 6px 0 #4a2cc0, 0 8px 20px rgba(106,76,255,0.35);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex: 1 1 140px;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #4a2cc0, 0 4px 10px rgba(106,76,255,0.35);
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ----- Feedback ----- */
+  .feedback {
+    text-align: center;
+    margin-top: 14px;
+    min-height: 48px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    transition: all 0.3s;
+  }
+  .feedback.correct {
+    color: #15803d;
+    animation: pop 0.4s ease;
+  }
+  .feedback.wrong {
+    color: #be123c;
+    animation: shake 0.4s ease;
+  }
+  .feedback .hint {
+    display: block;
+    font-size: 1rem;
+    color: #444;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .feedback .motivator {
+    display: block;
+    font-size: 0.95rem;
+    color: #6a4cff;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+  @keyframes pop {
+    0%   { transform: scale(0.6); }
+    60%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(8px); }
+    60%      { transform: translateX(-6px); }
+    80%      { transform: translateX(6px); }
+  }
+
+  /* ----- Pantalla final ----- */
+  .final {
+    text-align: center;
+    padding: 10px 4px;
+    animation: flipIn 0.6s ease;
+  }
+  .final-emoji {
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 6px;
+    animation: bounce 1.2s ease infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+  }
+  .final-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ff3d7f, #6a4cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .final-message {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding: 0 8px;
+  }
+  .final-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .final-stat {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 8px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+  }
+  .final-stat-icon { font-size: 1.6rem; }
+  .final-stat-value {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin-top: 4px;
+  }
+  .final-stat-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .final-stat.ok    { background: linear-gradient(135deg, #d4fce0, #a7f3c8); }
+  .final-stat.err   { background: linear-gradient(135deg, #ffe0e0, #ffb3b3); }
+  .final-stat.score { background: linear-gradient(135deg, #fff3c4, #ffe066); }
+  .final-stat.pct   { background: linear-gradient(135deg, #d4e8ff, #a4c8ff); }
+
+  .btn-restart {
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 18px;
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    box-shadow: 0 6px 0 #1ea760, 0 8px 20px rgba(67,233,123,0.4);
+  }
+
+  /* ----- Confeti ----- */
+  .confetti {
+    position: fixed;
+    top: -20px;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to {
+      transform: translateY(110vh) rotate(720deg);
+      opacity: 0.4;
+    }
+  }
+
+  .hidden { display: none !important; }
+
+  /* Responsive ajustes */
+  @media (max-width: 380px) {
+    .stat-label { font-size: 0.62rem; }
+    .stat-value { font-size: 1rem; }
+    .answer-input { font-size: 1.4rem; padding: 12px; }
+    .btn { font-size: 1rem; padding: 12px 16px; }
+  }
+
+  @media (min-width: 700px) {
+    .app { max-width: 640px; padding: 30px; }
+    .card { min-height: 240px; padding: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Burbujas decorativas -->
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+
+<div class="app">
+  <!-- Pantalla de juego -->
+  <div id="game-screen">
+    <div class="header">
+      <div class="title">✖️ Tablas Mágicas ✨</div>
+      <div class="subtitle">¡Demuestra cuánto sabes! 🚀</div>
+    </div>
+
+    <div class="progress-line">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat aciertos">
+        <div class="stat-icon">✅</div>
+        <div id="stat-correct" class="stat-value">0</div>
+        <div class="stat-label">Aciertos</div>
+      </div>
+      <div class="stat errores">
+        <div class="stat-icon">❌</div>
+        <div id="stat-wrong" class="stat-value">0</div>
+        <div class="stat-label">Errores</div>
+      </div>
+      <div class="stat racha">
+        <div class="stat-icon">🔥</div>
+        <div id="stat-streak" class="stat-value">0</div>
+        <div class="stat-label">Racha</div>
+      </div>
+      <div class="stat logro">
+        <div class="stat-icon">🎯</div>
+        <div id="stat-pct" class="stat-value">0%</div>
+        <div class="stat-label">Logro</div>
+      </div>
+    </div>
+
+    <div id="card" class="card flip-in">
+      <div id="ex-counter" class="ex-counter">EJERCICIO 1 DE 15</div>
+      <div id="equation" class="equation">
+        <span id="num1">0</span><span class="op">×</span><span id="num2">0</span><span class="op">=</span><span class="qmark">?</span>
+      </div>
+    </div>
+
+    <div class="answer-row">
+      <input
+        id="answer-input"
+        class="answer-input"
+        type="number"
+        inputmode="numeric"
+        placeholder="?"
+        autocomplete="off"
+      >
+      <button id="btn-answer" class="btn">Responder</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+  </div>
+
+  <!-- Pantalla final -->
+  <div id="final-screen" class="final hidden">
+    <div id="final-emoji" class="final-emoji">🏆</div>
+    <div class="final-title">¡Juego Terminado!</div>
+    <div id="final-message" class="final-message">¡Buen trabajo!</div>
+
+    <div class="final-stats">
+      <div class="final-stat score">
+        <div class="final-stat-icon">📋</div>
+        <div id="final-grade" class="final-stat-value">1.0</div>
+        <div class="final-stat-label">Calificación</div>
+      </div>
+      <div class="final-stat pct">
+        <div class="final-stat-icon">🎯</div>
+        <div id="final-pct" class="final-stat-value">0%</div>
+        <div class="final-stat-label">Logro</div>
+      </div>
+      <div class="final-stat ok">
+        <div class="final-stat-icon">✅</div>
+        <div id="final-correct" class="final-stat-value">0</div>
+        <div class="final-stat-label">Aciertos</div>
+      </div>
+      <div class="final-stat err">
+        <div class="final-stat-icon">❌</div>
+        <div id="final-wrong" class="final-stat-value">0</div>
+        <div class="final-stat-label">Errores</div>
+      </div>
+    </div>
+
+    <button id="btn-restart" class="btn btn-restart">🔄 Jugar otra vez</button>
+  </div>
+</div>
+
+<script>
+  // ====== CONFIGURACIÓN ======
+  const TOTAL_EJERCICIOS = 15;
+  const TABLA_MIN = 0;
+  const TABLA_MAX = 10;
+
+  const motivadores = [
+    "¡Excelente! 🌟",
+    "¡Sigue así! 🚀",
+    "¡Tú puedes! 💪",
+    "¡Buena racha! 🔥",
+    "¡Cada día mejoras! 📈",
+    "¡Increíble! ✨",
+    "¡Eres una estrella! ⭐",
+    "¡Muy bien! 👏",
+    "¡Genial! 🎉",
+    "¡Vamos con todo! 💥"
+  ];
+
+  const animos = [
+    "¡No te rindas! 💪",
+    "¡Inténtalo de nuevo! 🌈",
+    "¡Aprender es así! 🌱",
+    "¡Sigue intentando! ✨",
+    "¡La práctica hace al maestro! 🎯"
+  ];
+
+  // ====== ESTADO ======
+  let ejercicios = [];
+  let indice = 0;
+  let aciertos = 0;
+  let errores = 0;
+  let racha = 0;
+  let respondido = false;
+
+  // ====== DOM ======
+  const $num1 = document.getElementById('num1');
+  const $num2 = document.getElementById('num2');
+  const $exCounter = document.getElementById('ex-counter');
+  const $card = document.getElementById('card');
+  const $input = document.getElementById('answer-input');
+  const $btnAnswer = document.getElementById('btn-answer');
+  const $feedback = document.getElementById('feedback');
+  const $statCorrect = document.getElementById('stat-correct');
+  const $statWrong = document.getElementById('stat-wrong');
+  const $statStreak = document.getElementById('stat-streak');
+  const $statPct = document.getElementById('stat-pct');
+  const $progressFill = document.getElementById('progress-fill');
+  const $gameScreen = document.getElementById('game-screen');
+  const $finalScreen = document.getElementById('final-screen');
+  const $btnRestart = document.getElementById('btn-restart');
+
+  // ====== UTILIDADES ======
+  function aleatorio(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function elegirAlAzar(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // Genera 15 ejercicios aleatorios sin repetir el mismo de forma consecutiva
+  function generarEjercicios() {
+    const lista = [];
+    let ultimoKey = '';
+    for (let i = 0; i < TOTAL_EJERCICIOS; i++) {
+      let a, b, key;
+      let intentos = 0;
+      do {
+        a = aleatorio(TABLA_MIN, TABLA_MAX);
+        b = aleatorio(TABLA_MIN, TABLA_MAX);
+        key = a + 'x' + b;
+        intentos++;
+      } while (key === ultimoKey && intentos < 10);
+      ultimoKey = key;
+      lista.push({ a, b, resultado: a * b });
+    }
+    return lista;
+  }
+
+  function mostrarEjercicio() {
+    const ej = ejercicios[indice];
+    $num1.textContent = ej.a;
+    $num2.textContent = ej.b;
+    $exCounter.textContent = `EJERCICIO ${indice + 1} DE ${TOTAL_EJERCICIOS}`;
+    $input.value = '';
+    $input.disabled = false;
+    $btnAnswer.disabled = false;
+    $feedback.textContent = '';
+    $feedback.className = 'feedback';
+    respondido = false;
+
+    // Animación de entrada de la flashcard
+    $card.classList.remove('flip-in');
+    void $card.offsetWidth; // reflow para reiniciar animación
+    $card.classList.add('flip-in');
+
+    actualizarProgreso();
+
+    // Foco automático (en móvil puede no abrir teclado, pero en desktop sí)
+    setTimeout(() => $input.focus(), 100);
+  }
+
+  function actualizarProgreso() {
+    $statCorrect.textContent = aciertos;
+    $statWrong.textContent = errores;
+    $statStreak.textContent = racha;
+    const total = aciertos + errores;
+    const pct = total === 0 ? 0 : Math.round((aciertos / total) * 100);
+    $statPct.textContent = pct + '%';
+
+    // Barra de progreso por ejercicio
+    const avance = ((indice) / TOTAL_EJERCICIOS) * 100;
+    $progressFill.style.width = avance + '%';
+  }
+
+  function responder() {
+    if (respondido) return;
+    const valor = $input.value.trim();
+    if (valor === '') {
+      $input.focus();
+      // pequeño temblor para indicar que falta respuesta
+      $input.style.borderColor = '#ff3d7f';
+      setTimeout(() => $input.style.borderColor = '', 400);
+      return;
+    }
+
+    respondido = true;
+    $input.disabled = true;
+    $btnAnswer.disabled = true;
+
+    const respuestaUsuario = parseInt(valor, 10);
+    const ej = ejercicios[indice];
+    const correcto = respuestaUsuario === ej.resultado;
+
+    if (correcto) {
+      aciertos++;
+      racha++;
+      $feedback.className = 'feedback correct';
+      $feedback.innerHTML = `¡Correcto! 🎉 <span class="motivator">${elegirAlAzar(motivadores)}</span>`;
+      lanzarConfeti();
+    } else {
+      errores++;
+      racha = 0;
+      $feedback.className = 'feedback wrong';
+      $feedback.innerHTML = `Intenta otra vez 💪
+        <span class="hint">La respuesta era <b>${ej.a} × ${ej.b} = ${ej.resultado}</b></span>
+        <span class="motivator">${elegirAlAzar(animos)}</span>`;
+    }
+
+    actualizarProgreso();
+
+    // Avanzar al siguiente
+    const espera = correcto ? 1100 : 1900;
+    setTimeout(() => {
+      indice++;
+      if (indice >= TOTAL_EJERCICIOS) {
+        mostrarPantallaFinal();
+      } else {
+        mostrarEjercicio();
+      }
+    }, espera);
+  }
+
+  // ====== PANTALLA FINAL ======
+  function mostrarPantallaFinal() {
+    // 1 punto por ejercicio correcto. Total = TOTAL_EJERCICIOS.
+    const puntaje = aciertos;
+    const puntajeMax = TOTAL_EJERCICIOS;
+    const pct = Math.round((puntaje / puntajeMax) * 100);
+
+    // ----- Calificación chilena con 60% de exigencia -----
+    // Escala 1.0 a 7.0, nota mínima de aprobación = 4.0
+    // Bajo el 60%: nota lineal entre 1.0 (0%) y 4.0 (60%)
+    // Sobre el 60%: nota lineal entre 4.0 (60%) y 7.0 (100%)
+    const exigencia = 0.60;
+    const ratio = puntaje / puntajeMax;
+    let nota;
+    if (ratio < exigencia) {
+      nota = 1.0 + (ratio / exigencia) * 3.0;
+    } else {
+      nota = 4.0 + ((ratio - exigencia) / (1 - exigencia)) * 3.0;
+    }
+    nota = Math.round(nota * 10) / 10; // 1 decimal
+    if (nota < 1.0) nota = 1.0;
+    if (nota > 7.0) nota = 7.0;
+
+    document.getElementById('final-correct').textContent = aciertos;
+    document.getElementById('final-wrong').textContent = errores;
+    document.getElementById('final-pct').textContent = pct + '%';
+    document.getElementById('final-grade').textContent = nota.toFixed(1);
+
+    // Color de la calificación según aprobación
+    const $finalGrade = document.getElementById('final-grade');
+    if (nota >= 4.0) {
+      $finalGrade.style.color = '#15803d'; // verde
+    } else {
+      $finalGrade.style.color = '#be123c'; // rojo
+    }
+
+    let emoji, mensaje;
+    if (nota === 7.0) {
+      emoji = '🏆';
+      mensaje = '¡PERFECTO! Nota máxima, eres un crack 🌟';
+    } else if (nota >= 6.0) {
+      emoji = '🥇';
+      mensaje = '¡Excelente trabajo! Gran calificación 🚀';
+    } else if (nota >= 5.0) {
+      emoji = '🥈';
+      mensaje = '¡Muy bien! Vas por excelente camino 💪';
+    } else if (nota >= 4.0) {
+      emoji = '✅';
+      mensaje = '¡Aprobado! Sigue practicando para subir tu nota 🌱';
+    } else if (nota >= 3.0) {
+      emoji = '💪';
+      mensaje = '¡Casi! Un poco más de práctica y lo lograrás 🌈';
+    } else {
+      emoji = '🌱';
+      mensaje = '¡No te rindas! Cada intento te acerca a la meta ✨';
+    }
+
+    document.getElementById('final-emoji').textContent = emoji;
+    document.getElementById('final-message').textContent = mensaje;
+
+    $progressFill.style.width = '100%';
+    $gameScreen.classList.add('hidden');
+    $finalScreen.classList.remove('hidden');
+
+    // Confeti final si aprobó
+    if (nota >= 4.0) {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => lanzarConfeti(20), i * 200);
+      }
+    }
+  }
+
+  // ====== CONFETI ======
+  function lanzarConfeti(cantidad = 14) {
+    const colores = ['#ff3d7f', '#6a4cff', '#43e97b', '#ffd166', '#00b4d8', '#ff7ad9'];
+    for (let i = 0; i < cantidad; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colores[Math.floor(Math.random() * colores.length)];
+      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }
+  }
+
+  // ====== INICIO / REINICIO ======
+  function iniciarJuego() {
+    ejercicios = generarEjercicios();
+    indice = 0;
+    aciertos = 0;
+    errores = 0;
+    racha = 0;
+    respondido = false;
+    $finalScreen.classList.add('hidden');
+    $gameScreen.classList.remove('hidden');
+    mostrarEjercicio();
+  }
+
+  // ====== EVENTOS ======
+  $btnAnswer.addEventListener('click', responder);
+  $input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      responder();
+    }
+  });
+  $btnRestart.addEventListener('click', iniciarJuego);
+
+  // Arrancar
+  iniciarJuego();
+</script>
+
+</body>
+</html>
