@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test 3 · Multiplicación y División</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;font-family:'Nunito',sans-serif}
+body{background:#0d0b1e;color:#f0f0ff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;gap:10px;background:linear-gradient(90deg,#12003a,#0a001f,#12003a);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.topbar h1{font-family:'Fredoka One',cursive;font-size:1rem;background:linear-gradient(90deg,#ffd700,#ff8c42,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;cursor:pointer}
+.topbar h1:hover{filter:brightness(1.2)}
+.timer-box{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);border-radius:8px;padding:4px 10px}
+#clock{font-family:'Fredoka One',cursive;font-size:1.05rem;color:#ffd700;letter-spacing:1px}
+#clock.urgent{color:#ff6b9d;animation:blink .5s step-start infinite}
+@keyframes blink{50%{opacity:.3}}
+.btn-sm{padding:5px 12px;border-radius:18px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:.8rem;background:linear-gradient(135deg,#00ff88,#00bb66);color:#001a00;transition:transform .15s}
+.btn-sm:hover{transform:scale(1.06)}
+.btn-sm.stop{background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff}
+.stars-badge{display:flex;align-items:center;gap:6px;background:rgba(168,255,120,.1);border:1px solid rgba(168,255,120,.3);border-radius:18px;padding:4px 12px;font-family:'Fredoka One',cursive;font-size:.95rem;color:#a8ff78;white-space:nowrap}
+#progbar{height:4px;background:rgba(255,255,255,.07);flex-shrink:0}
+#progfill{height:100%;width:0%;background:linear-gradient(90deg,#00d4ff,#c77dff,#ff6b9d);transition:width .8s}
+
+/* TURN BANNER */
+.turn-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;flex-wrap:wrap;background:rgba(168,255,120,.05);border-bottom:1px solid rgba(168,255,120,.12);font-family:'Fredoka One',cursive;font-size:.78rem;flex-shrink:0}
+#tb-label{color:#888;font-size:.72rem}
+.turn-chip{padding:3px 12px;border-radius:18px;border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-size:.78rem;transition:all .3s}
+.turn-chip.active{background:rgba(255,215,0,.15);border-color:#ffd700;color:#ffd700;animation:glow .9s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 4px rgba(255,215,0,.3)}to{box-shadow:0 0 12px rgba(255,215,0,.7)}}
+
+/* MAIN */
+.main{flex:1;min-height:0;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;display:none;flex-direction:column;padding:10px 14px;overflow-y:auto}
+.view.on{display:flex;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.view::-webkit-scrollbar{width:5px}
+.view::-webkit-scrollbar-thumb{background:rgba(199,125,255,.35)}
+
+/* HOME */
+.home-tip{background:rgba(255,140,66,.1);border:1px solid rgba(255,140,66,.4);border-radius:10px;padding:7px 12px;font-size:.75rem;line-height:1.45;color:#ffcc99;margin-bottom:8px;flex-shrink:0}
+.home-tip strong{color:#ff8c42}
+.activity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.activity-card{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:4px;min-height:100px}
+.activity-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
+.activity-card:hover{transform:translateY(-2px);background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border-color:rgba(255,255,255,.25)}
+.activity-card.done{opacity:.55}
+.activity-card.done::after{content:'✓';position:absolute;top:8px;right:10px;color:#00ff88;font-size:1.1rem;font-weight:900}
+.act-time{font-size:.68rem;color:#ffd700;font-weight:800;letter-spacing:.5px}
+.act-title{font-family:'Fredoka One',cursive;font-size:.95rem;color:#fff;line-height:1.2}
+.act-desc{font-size:.7rem;color:#999;line-height:1.4}
+.act-meta{font-size:.65rem;color:#c77dff;font-weight:700;margin-top:auto}
+.act-num{position:absolute;bottom:8px;right:10px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.4);border:1px solid var(--c);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:.7rem;color:var(--c)}
+
+/* ACTIVITY VIEW */
+.act-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-shrink:0}
+.btn-back{padding:5px 12px;border-radius:18px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:.78rem;background:rgba(255,255,255,.1);color:#fff;transition:all .15s}
+.btn-back:hover{background:rgba(255,255,255,.2);transform:translateX(-2px)}
+.act-h-title{font-family:'Fredoka One',cursive;font-size:1.05rem;color:#ffd700;flex:1}
+.act-h-time{font-size:.7rem;color:#888;font-weight:700}
+
+/* CARDS */
+.card{background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:10px 12px;margin-bottom:8px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.card.gold::before{background:linear-gradient(90deg,#ffd700,#ff8c42)}
+.card.teal::before{background:linear-gradient(90deg,#00d4ff,#00ff88)}
+.card.pink::before{background:linear-gradient(90deg,#ff6b9d,#c77dff)}
+.card.team::before{background:linear-gradient(90deg,#a8ff78,#78ffd6)}
+.card.purple::before{background:linear-gradient(90deg,#c77dff,#6a0dad)}
+.ct{font-family:'Fredoka One',cursive;font-size:.92rem;margin-bottom:5px}
+.ct.gold{color:#ffd700}.ct.teal{color:#00d4ff}.ct.pink{color:#ff6b9d}.ct.team{color:#a8ff78}.ct.purple{color:#c77dff}
+.cb{font-size:.78rem;color:#bbb;line-height:1.6}
+.cb strong{color:#fff}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+
+.formula{text-align:center;font-family:'Fredoka One',cursive;font-size:1rem;padding:10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin:6px 0;letter-spacing:.5px}
+
+/* STEP-BY-STEP */
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid #c77dff}
+.step-n{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c77dff,#6a0dad);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:.78rem;color:#fff}
+.step-txt{font-size:.78rem;line-height:1.5;color:#ddd;flex:1}
+.step-txt strong{color:#ffd700}
+
+/* TABLA */
+.mt{width:100%;border-collapse:collapse;font-family:'Fredoka One',cursive;font-size:.78rem}
+.mt th,.mt td{padding:5px 4px;text-align:center;border:1px solid rgba(255,255,255,.08)}
+.mt th{background:rgba(255,215,0,.18);color:#ffd700}
+.mt td{background:rgba(255,255,255,.02);transition:background .2s}
+.mt td:hover{background:rgba(199,125,255,.3)}
+
+/* DIV VISUAL */
+.dv{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-family:'Fredoka One',cursive;font-size:1.4rem}
+.db{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid}
+.db.a{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.1)}
+.db.b{border-color:#ff6b9d;color:#ff6b9d;background:rgba(255,107,157,.1)}
+.db.c{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,.1)}
+.db.d{border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,.1)}
+.dl{font-size:.6rem;text-align:center;margin-top:2px}
+
+/* QUIZ */
+.quiz{background:rgba(0,0,0,.25);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.q-text{font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center}
+.q-hint{font-size:.75rem;color:#bbb;text-align:center;max-width:340px;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:8px;border-left:3px solid #c77dff}
+.q-counter{font-size:.7rem;color:#c77dff;font-weight:800;letter-spacing:.5px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px}
+.ch{padding:12px 8px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;font-family:'Fredoka One',cursive;font-size:1.3rem;text-align:center;transition:all .18s}
+.ch:hover:not(:disabled){border-color:#c77dff;background:rgba(199,125,255,.15);transform:scale(1.04)}
+.ch:disabled{cursor:default}
+.ch.ok{border-color:#00ff88;background:rgba(0,255,136,.18);color:#00ff88}
+.ch.no{border-color:#ff6b9d;background:rgba(255,61,127,.15);color:#ff6b9d}
+.ch.show-ok{border-color:#00ff88;background:rgba(0,255,136,.1);color:#00ff88}
+.input-row{display:flex;gap:8px;align-items:center}
+.ans-input{width:110px;height:48px;border-radius:10px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);color:#fff;font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;outline:none}
+.ans-input:focus{border-color:#ffd700}
+.ans-input.ok{border-color:#00ff88;background:rgba(0,255,136,.12)}
+.ans-input.no{border-color:#ff6b9d;background:rgba(255,107,157,.12);animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-7px)}70%{transform:translateX(7px)}}
+.btn-check{padding:10px 20px;border-radius:18px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:1rem;background:linear-gradient(135deg,#c77dff,#6a0dad);color:#fff}
+.btn-check:hover{transform:scale(1.05)}
+.btn-next{display:none;padding:8px 22px;border-radius:18px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:.95rem;background:linear-gradient(135deg,#ffd700,#ff8c42);color:#1a0000}
+.btn-next.show{display:block}
+.btn-next:hover{transform:scale(1.05)}
+.fb{font-family:'Fredoka One',cursive;font-size:1rem;text-align:center;min-height:24px}
+.fb.ok{color:#00ff88}.fb.no{color:#ff6b9d}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:280px}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
+.dot.ok{background:#00ff88}
+.dot.no{background:#ff6b9d}
+.dot.curr{background:#ffd700;transform:scale(1.4)}
+
+.btn-done{display:block;margin:8px auto 4px;padding:9px 24px;border-radius:18px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:.9rem;background:linear-gradient(135deg,#a8ff78,#78ffd6);color:#001a00;transition:transform .15s}
+.btn-done:hover{transform:scale(1.04)}
+
+.cf{position:fixed;top:50%;left:50%;pointer-events:none;z-index:9999}
+.cf span{position:absolute;font-size:1.3rem;animation:cf 1.1s ease-out forwards}
+@keyframes cf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2) rotate(var(--r));opacity:0}}
+
+.end-card{text-align:center;padding:20px;border-radius:14px;background:linear-gradient(135deg,rgba(168,255,120,.1),rgba(120,255,214,.1));border:1px solid rgba(168,255,120,.3)}
+.end-emoji{font-size:3rem;animation:bounce .7s ease-in-out infinite alternate}
+@keyframes bounce{to{transform:translateY(-10px)}}
+.end-title{font-family:'Fredoka One',cursive;font-size:1.5rem;background:linear-gradient(135deg,#a8ff78,#78ffd6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0}
+
+/* EXAMPLE BOX */
+.example-box{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.25);border-radius:10px;padding:8px 10px;margin:6px 0}
+.example-box .ex-label{font-size:.68rem;color:#ffd700;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
+.example-box .ex-content{font-family:'Fredoka One',cursive;font-size:.95rem;color:#fff}
+.example-box .ex-content small{font-family:'Nunito',sans-serif;font-size:.7rem;color:#aaa;display:block;margin-top:2px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1 onclick="goHome()">🚀 Test 3</h1>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="timer-box"><span>⏱</span><span id="clock">60:00</span></div>
+    <button class="btn-sm" id="tbtn" onclick="toggleTimer()">▶ Iniciar</button>
+  </div>
+  <div class="stars-badge">🤝 ⭐ <span id="stars">0</span></div>
+</div>
+<div id="progbar"><div id="progfill"></div></div>
+
+<div class="turn-banner">
+  <span id="tb-label">RESPONDE:</span>
+  <div class="turn-chip" id="chip-t">🦁 Tito</div>
+  <span style="color:#555">+</span>
+  <div class="turn-chip" id="chip-j">🦋 Josefa</div>
+</div>
+
+<div class="main">
+  <div class="view on" id="v-home">
+    <div class="home-tip"><strong>🎯 Cómo funciona:</strong> Hagan clic en cada actividad. Lean las explicaciones juntos antes de responder. Los roles rotan después de cada respuesta correcta.</div>
+    <div class="activity-grid" id="act-grid"></div>
+  </div>
+  <div class="view" id="v-act">
+    <div class="act-header">
+      <button class="btn-back" onclick="goHome()">← Volver</button>
+      <div class="act-h-title" id="act-h-title">—</div>
+      <div class="act-h-time" id="act-h-time">—</div>
+    </div>
+    <div id="act-content"></div>
+  </div>
+</div>
+
+<script>
+// AUDIO
+var AC=null;
+function ga(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC}
+function beep(freqs,type){type=type||'sine';try{var c=ga();for(var i=0;i<freqs.length;i++){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freqs[i];g.gain.setValueAtTime(.22,c.currentTime+i*.09);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.09+.28);o.start(c.currentTime+i*.09);o.stop(c.currentTime+i*.09+.3)}}catch(e){}}
+function sndOk(){beep([523,659,784,1047])}
+function sndNo(){beep([220,140],'sawtooth')}
+function sndStar(){beep([659,784,880,1047,1319],'triangle')}
+
+// TIMER
+var secs=3600,running=false,iv=null;
+function toggleTimer(){running=!running;var b=document.getElementById('tbtn');if(running){b.textContent='⏸ Pausar';b.classList.add('stop');iv=setInterval(function(){secs--;tickTimer();if(secs<=0){clearInterval(iv);running=false}},1000)}else{b.textContent='▶ Reanudar';b.classList.remove('stop');clearInterval(iv)}}
+function tickTimer(){var m=Math.floor(secs/60),s=secs%60;var d=document.getElementById('clock');d.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;if(secs<=300)d.classList.add('urgent');else d.classList.remove('urgent');document.getElementById('progfill').style.width=Math.max(0,Math.min(100,(3600-secs)/3600*100))+'%'}
+
+// STARS
+var teamStars=0;
+function addStar(){teamStars++;document.getElementById('stars').textContent=teamStars;sndStar();burst()}
+function burst(){var e=['⭐','🌟','✨','🎉','💫','🤝'];var w=document.createElement('div');w.className='cf';document.body.appendChild(w);for(var i=0;i<7;i++){var s=document.createElement('span');s.textContent=e[i%e.length];var a=(i/7)*360,d=70+Math.random()*50,r=a*Math.PI/180;s.style.setProperty('--dx',Math.round(Math.cos(r)*d)+'px');s.style.setProperty('--dy',Math.round(Math.sin(r)*d)+'px');s.style.setProperty('--r',(Math.random()*360-180)+'deg');w.appendChild(s)}setTimeout(function(){w.remove()},1300)}
+
+// TURN
+var globalTurn=0;
+function updateTurn(){var a=globalTurn%2;document.getElementById('chip-t').className='turn-chip'+(a===0?' active':'');document.getElementById('chip-j').className='turn-chip'+(a===1?' active':'');document.getElementById('tb-label').textContent='RESPONDE:'}
+function rotateTurn(){globalTurn++;updateTurn()}
+updateTurn();
+
+// ACTIVITIES
+var activities=[
+  {id:'a1',time:'0–5',title:'🔥 Calentamiento',desc:'Tablas + 6 preguntas',color:'#ff8c42',meta:'6 ejercicios'},
+  {id:'a2',time:'5–15',title:'📐 Distributiva',desc:'Pág 44-45 + 8 ejercicios',color:'#c77dff',meta:'8 ejercicios'},
+  {id:'a3',time:'15–20',title:'✖ Por 0 y por 1',desc:'Multiplicación especial',color:'#00d4ff',meta:'8 ejercicios'},
+  {id:'a4',time:'20–30',title:'🧮 Algoritmo',desc:'Mult estándar paso a paso',color:'#ffd700',meta:'8 ejercicios'},
+  {id:'a5',time:'30–45',title:'➗ División',desc:'Relación inversa + algoritmo',color:'#00ff88',meta:'10 ejercicios'},
+  {id:'a6',time:'45–55',title:'🎮 Mezcla',desc:'Todo junto en orden aleatorio',color:'#ff6b9d',meta:'10 ejercicios'},
+  {id:'a7',time:'55–60',title:'🏆 Cierre',desc:'Repaso + reflexión final',color:'#a8ff78',meta:'6 puntos'},
+];
+var doneSet={};
+
+function renderHome(){var g=document.getElementById('act-grid');var html='';for(var i=0;i<activities.length;i++){var a=activities[i];var doneCls=doneSet[a.id]?' done':'';html+='<div class="activity-card'+doneCls+'" style="--c:'+a.color+'" onclick="openAct(\''+a.id+'\')"><div class="act-time">'+a.time+' MIN</div><div class="act-title">'+a.title+'</div><div class="act-desc">'+a.desc+'</div><div class="act-meta">'+a.meta+'</div><div class="act-num">'+(i+1)+'</div></div>'}g.innerHTML=html}
+
+function goHome(){document.getElementById('v-home').classList.add('on');document.getElementById('v-act').classList.remove('on');renderHome()}
+
+function openAct(id){document.getElementById('v-home').classList.remove('on');document.getElementById('v-act').classList.add('on');var a=null;for(var i=0;i<activities.length;i++)if(activities[i].id===id)a=activities[i];document.getElementById('act-h-title').textContent=a.title;document.getElementById('act-h-time').textContent=a.time+' min';document.getElementById('act-content').innerHTML=ACTIVITY_HTML[id];if(ACTIVITY_INIT[id])ACTIVITY_INIT[id]();}
+
+function markDone(id){doneSet[id]=true;goHome()}
+
+// ─── ACTIVITY CONTENT ────────────────────────────────
+var ACTIVITY_HTML={
+
+a1: '<div class="card team">'+
+      '<div class="ct team">🔥 Calentamiento — ¿por qué importan las tablas?</div>'+
+      '<div class="cb">Las tablas son la BASE para multiplicar números grandes Y para dividir. Si las saben rápido, todo lo demás es más fácil. Hoy las repasamos en equipo.</div>'+
+    '</div>'+
+    '<div class="card gold" style="overflow-x:auto"><div class="ct gold">📋 Tabla del 1 al 9 (de consulta para todo el equipo)</div><table class="mt" id="t1-mtable"></table></div>'+
+    '<div class="g3">'+
+      '<div class="card teal"><div class="ct teal">Truco del 9 🪄</div><div class="cb" style="font-size:.75rem">Los dígitos del resultado SUMAN 9.<br>9×3=27 → 2+7=9 ✓<br>9×6=54 → 5+4=9 ✓<br>9×8=72 → 7+2=9 ✓</div></div>'+
+      '<div class="card pink"><div class="ct pink">Truco del 5 ⭐</div><div class="cb" style="font-size:.75rem">Termina en 0 o 5.<br>5×par → 0<br>5×impar → 5<br>5,10,15,20,25...</div></div>'+
+      '<div class="card purple"><div class="ct purple">Truco del 4 ✌️</div><div class="cb" style="font-size:.75rem">Doblar dos veces.<br>4×7 = 7+7=14, 14+14=<strong>28</strong><br>4×6 = 6+6=12, 12+12=<strong>24</strong></div></div>'+
+    '</div>'+
+    '<div class="card team"><div class="ct team">🤝 Roles en este bloque</div><div class="cb">Quien responde dice el resultado en voz alta. El otro confirma mirando la tabla. Pueden cambiar de turno cuando quieran.</div></div>'+
+    '<div class="quiz" id="t1-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a1\')" id="t1-done" style="display:none">✓ Marcar como completado</button>',
+
+a2: '<div class="card gold">'+
+      '<div class="ct gold">✨ ¿Qué es la propiedad distributiva?</div>'+
+      '<div class="cb">Permite "repartir" una multiplicación cuando uno de los factores es una SUMA. Es súper útil para calcular más rápido números grandes.</div>'+
+      '<div class="formula" style="color:#ffd700;margin-top:8px">a × (b + c) = a × b + a × c</div>'+
+    '</div>'+
+    '<div class="card purple"><div class="ct purple">🔍 Vamos paso a paso</div>'+
+      '<div class="example-box"><div class="ex-label">EJEMPLO 1: 4 × (3 + 2)</div><div class="ex-content">4 × (3 + 2) = 4×3 + 4×2 = 12 + 8 = <strong style="color:#ffd700">20</strong><small>El 4 se "reparte" entre el 3 y el 2.</small></div></div>'+
+      '<div class="example-box"><div class="ex-label">EJEMPLO 2: 6 × 14 (truco para números grandes)</div><div class="ex-content">6 × 14 = 6 × (10 + 4) = 6×10 + 6×4 = 60 + 24 = <strong style="color:#ffd700">84</strong><small>Descompongo 14 en 10+4 para hacerlo fácil.</small></div></div>'+
+      '<div class="example-box"><div class="ex-label">EJEMPLO 3: 7 × 12</div><div class="ex-content">7 × 12 = 7 × (10 + 2) = 70 + 14 = <strong style="color:#ffd700">84</strong><small>Lo mismo: descomponer en 10 + algo.</small></div></div>'+
+    '</div>'+
+    '<div class="card teal"><div class="ct teal">🤝 Cómo trabajarlo</div><div class="cb">Antes de responder, escriban en el cuaderno la descomposición. Quien lee la pregunta también dice el resultado de la primera parte. El otro completa la suma final.</div></div>'+
+    '<div class="quiz" id="a2-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a2\')" id="a2-done" style="display:none">✓ Marcar como completado</button>',
+
+a3: '<div class="g2">'+
+      '<div class="card teal"><div class="ct teal">🔵 Multiplicar por 0</div>'+
+        '<div class="cb"><strong>Regla:</strong> N × 0 = 0 SIEMPRE.<br><br>5×0=0 · 25×0=0 · 999×0=0 · 0×0=0</div>'+
+        '<div class="example-box"><div class="ex-label">¿POR QUÉ?</div><div class="ex-content" style="font-size:.78rem;font-family:\'Nunito\',sans-serif">Si tengo 5 cajas con 0 galletas cada una, tengo 0 galletas en total. ¡Aunque sean mil cajas!</div></div>'+
+      '</div>'+
+      '<div class="card pink"><div class="ct pink">🟢 Multiplicar por 1</div>'+
+        '<div class="cb"><strong>Regla:</strong> N × 1 = N SIEMPRE.<br><br>7×1=7 · 25×1=25 · 283×1=283</div>'+
+        '<div class="example-box"><div class="ex-label">¿POR QUÉ?</div><div class="ex-content" style="font-size:.78rem;font-family:\'Nunito\',sans-serif">Si tengo 1 caja con 7 galletas, tengo 7 galletas. La cantidad no cambia.</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card team"><div class="ct team">⚠️ Cuidado con esto</div>'+
+      '<div class="cb"><strong style="color:#ff8c42">No confundir:</strong> 0 + N ≠ 0 × N<br><br>'+
+      '<span style="color:#00ff88">0 + 5 = 5</span> (suma: el cero no aporta nada)<br>'+
+      '<span style="color:#ff6b9d">0 × 5 = 0</span> (multiplicación: cero veces algo es cero)</div>'+
+    '</div>'+
+    '<div class="card gold"><div class="ct gold">🤝 Cómo trabajarlo</div><div class="cb">Estas son AUTOMÁTICAS. Túrnense respondiendo en voz alta MUY RÁPIDO, sin pensar. ¡A ver si pueden con todas seguidas!</div></div>'+
+    '<div class="quiz" id="a3-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a3\')" id="a3-done" style="display:none">✓ Marcar como completado</button>',
+
+a4: '<div class="card gold"><div class="ct gold">🧮 Algoritmo estándar — paso a paso</div>'+
+      '<div class="cb">Es la manera "vertical" de multiplicar. Sirve para cualquier número, por grande que sea.</div></div>'+
+    '<div class="card purple"><div class="ct purple">📝 Ejemplo: 24 × 3</div>'+
+      '<div class="steps">'+
+        '<div class="step"><div class="step-n">1</div><div class="step-txt">Escribimos los números uno bajo el otro, alineados a la <strong>derecha</strong>.</div></div>'+
+        '<div class="step"><div class="step-n">2</div><div class="step-txt">Multiplicamos <strong>3 × 4 = 12</strong>. Escribimos el <strong>2</strong> y nos llevamos <strong>1</strong>.</div></div>'+
+        '<div class="step"><div class="step-n">3</div><div class="step-txt">Multiplicamos <strong>3 × 2 = 6</strong>. Sumamos el <strong>1</strong> que llevábamos: <strong>6 + 1 = 7</strong>.</div></div>'+
+        '<div class="step"><div class="step-n">4</div><div class="step-txt">Resultado final: <strong style="color:#ffd700">72</strong></div></div>'+
+      '</div>'+
+      '<div class="example-box"><div class="ex-label">VISUALIZACIÓN</div><div class="ex-content" style="line-height:1.9">&nbsp;&nbsp;&nbsp;2 4<br>&nbsp;&nbsp;× &nbsp;3<br><span style="border-top:1px solid #ffd700;display:block;padding-top:2px">&nbsp;&nbsp;&nbsp;7 2</span></div></div>'+
+    '</div>'+
+    '<div class="card teal"><div class="ct teal">📝 Caso difícil: 35 × 24 (dos dígitos × dos dígitos)</div>'+
+      '<div class="steps">'+
+        '<div class="step"><div class="step-n">1</div><div class="step-txt">Multiplicamos <strong>35 × 4 = 140</strong> (primera fila).</div></div>'+
+        '<div class="step"><div class="step-n">2</div><div class="step-txt">Multiplicamos <strong>35 × 20 = 700</strong> (segunda fila — el cero al final es importante).</div></div>'+
+        '<div class="step"><div class="step-n">3</div><div class="step-txt">Sumamos las dos filas: <strong>140 + 700 = 840</strong>.</div></div>'+
+      '</div>'+
+      '<div class="example-box"><div class="ex-label">VISUALIZACIÓN</div><div class="ex-content" style="line-height:1.9">&nbsp;&nbsp;&nbsp;3 5<br>× 2 4<br><span style="border-top:1px solid #00d4ff;display:block;padding-top:2px">&nbsp;&nbsp;1 4 0 ← 35×4</span>+ &nbsp;7 0 0 ← 35×20<br><span style="border-top:1px solid #fff;display:block;padding-top:2px">&nbsp;&nbsp;8 4 0</span></div></div>'+
+    '</div>'+
+    '<div class="card team"><div class="ct team">🤝 Cómo trabajarlo</div><div class="cb">Uno resuelve en el cuaderno mientras el otro mira y escribe los pasos en voz alta. Al final, antes de responder aquí, REVISEN juntos. ¡Sin apuro!</div></div>'+
+    '<div class="quiz" id="a4-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a4\')" id="a4-done" style="display:none">✓ Marcar como completado</button>',
+
+a5: '<div class="card team"><div class="ct team">➗ Las partes de la división</div>'+
+      '<div class="dv" style="margin:10px 0">'+
+      '<div><div class="db a">24</div><div class="dl" style="color:#00d4ff">dividendo</div></div>'+
+      '<span>÷</span>'+
+      '<div><div class="db b">5</div><div class="dl" style="color:#ff6b9d">divisor</div></div>'+
+      '<span>=</span>'+
+      '<div><div class="db c">4</div><div class="dl" style="color:#00ff88">cociente</div></div>'+
+      '<span style="color:#ff8c42">+</span>'+
+      '<div><div class="db d">4</div><div class="dl" style="color:#ffd700">resto</div></div>'+
+      '</div>'+
+      '<div class="cb" style="font-size:.74rem;text-align:center;color:#aaa">Significa: 24 dividido en grupos de 5 da 4 grupos completos, y sobran 4.</div>'+
+    '</div>'+
+    '<div class="card teal"><div class="ct teal">🔗 Relación inversa — el truco más importante</div>'+
+      '<div class="cb"><strong>Multiplicar y dividir son operaciones opuestas</strong>. Si conoces la multiplicación, conoces la división.</div>'+
+      '<div class="example-box"><div class="ex-label">EJEMPLO</div><div class="ex-content">Si <strong>6 × 7 = 42</strong>, entonces:<br>→ <strong>42 ÷ 7 = 6</strong><br>→ <strong>42 ÷ 6 = 7</strong><small>¡Las tablas sirven para dividir también!</small></div></div>'+
+    '</div>'+
+    '<div class="card pink"><div class="ct pink">1️⃣ Casos especiales</div>'+
+      '<div class="g2" style="gap:6px;margin-top:6px">'+
+        '<div style="background:rgba(255,255,255,.04);padding:6px 10px;border-radius:8px"><div style="font-size:.7rem;color:#ff6b9d;font-weight:800">N ÷ 1 = N</div><div style="font-size:.78rem;color:#bbb">57 ÷ 1 = 57<br>123 ÷ 1 = 123</div></div>'+
+        '<div style="background:rgba(255,255,255,.04);padding:6px 10px;border-radius:8px"><div style="font-size:.7rem;color:#ff6b9d;font-weight:800">N ÷ N = 1</div><div style="font-size:.78rem;color:#bbb">57 ÷ 57 = 1<br>9 ÷ 9 = 1</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card gold"><div class="ct gold">✅ Cómo verificar una división</div>'+
+      '<div class="formula" style="color:#ffd700;font-size:.9rem">cociente × divisor + resto = dividendo</div>'+
+      '<div class="example-box"><div class="ex-label">EJEMPLO</div><div class="ex-content">24 ÷ 5 = 4 resto 4<br>Verifico: 4 × 5 + 4 = 20 + 4 = <strong style="color:#00ff88">24</strong> ✓</div></div>'+
+    '</div>'+
+    '<div class="card purple"><div class="ct purple">💡 Estimar el cociente con la tabla</div>'+
+      '<div class="cb">Cuando la división no es exacta, busca en la tabla del divisor el múltiplo más cercano por DEBAJO del dividendo.</div>'+
+      '<div class="example-box"><div class="ex-label">87 ÷ 9</div><div class="ex-content" style="font-size:.78rem;font-family:\'Nunito\',sans-serif">Tabla del 9: 9, 18, 27, 36, 45, 54, 63, 72, <strong style="color:#ffd700">81</strong>, 90.<br>El más cercano a 87 sin pasarse es <strong>81</strong> (que es 9×9).<br>→ Cociente: <strong>9</strong>, Resto: 87 − 81 = <strong>6</strong></div></div>'+
+    '</div>'+
+    '<div class="card team"><div class="ct team">🤝 Cómo trabajarlo</div><div class="cb">Para cada división, primero buscan juntos el múltiplo en la tabla. Quien responde dice el cociente; el otro VERIFICA usando la fórmula cociente×divisor+resto.</div></div>'+
+    '<div class="quiz" id="a5-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a5\')" id="a5-done" style="display:none">✓ Marcar como completado</button>',
+
+a6: '<div class="card team"><div class="ct team">🎮 Mezcla de todo lo aprendido</div><div class="cb">10 ejercicios que combinan tablas, propiedad distributiva, multiplicar por 0 y por 1, algoritmo estándar y división. ¡Vamos!</div></div>'+
+    '<div class="quiz" id="a6-quiz"></div>'+
+    '<button class="btn-done" onclick="markDone(\'a6\')" id="a6-done" style="display:none">✓ Marcar como completado</button>',
+
+a7: '<div class="end-card">'+
+      '<div class="end-emoji">🏆</div>'+
+      '<div class="end-title">¡Clase casi terminada!</div>'+
+      '<div style="font-size:.85rem;color:#aaa;margin:8px 0;line-height:1.5">Total de estrellas del equipo: <strong style="color:#ffd700">⭐ <span id="a7-stars">0</span></strong></div>'+
+    '</div>'+
+    '<div class="card teal"><div class="ct teal">📖 Para repasar antes del Test 3</div>'+
+      '<div class="cb">'+
+      '✅ <strong>Tablas hasta el 9</strong> — especialmente las que costaron más<br>'+
+      '✅ <strong>Propiedad distributiva</strong> — pág 44 y 45 del cuaderno<br>'+
+      '✅ <strong>Multiplicar por 0 y por 1</strong> — son automáticas<br>'+
+      '✅ <strong>Algoritmo estándar</strong> — multiplicar y dividir paso a paso<br>'+
+      '✅ <strong>Estimar cociente</strong> — usar la tabla como apoyo<br>'+
+      '✅ <strong>Verificar la división</strong> — cociente × divisor + resto'+
+      '</div></div>'+
+    '<div class="card gold"><div class="ct gold">💬 Reflexión final — convérsenlo</div>'+
+      '<div class="cb">'+
+      '1. ¿Qué parte les gustó más?<br>'+
+      '2. ¿Qué tema necesita más práctica?<br>'+
+      '3. ¿Cómo se ayudaron mutuamente hoy?<br>'+
+      '4. ¿Qué van a estudiar en casa esta noche?'+
+      '</div></div>'+
+    '<button class="btn-done" onclick="markDone(\'a7\')">✓ Terminar clase</button>',
+};
+
+// ─── ACTIVITY INIT ──────────────────────────────────
+var ACTIVITY_INIT={
+
+a1:function(){
+  var h='<thead><tr><th>×</th>';
+  for(var j=1;j<=9;j++)h+='<th>'+j+'</th>';
+  h+='</tr></thead><tbody>';
+  for(var i=1;i<=9;i++){h+='<tr><th>'+i+'</th>';for(var k=1;k<=9;k++)h+='<td>'+(i*k)+'</td>';h+='</tr>'}
+  h+='</tbody>';
+  document.getElementById('t1-mtable').innerHTML=h;
+  runMiniQuiz('t1-quiz',[
+    {q:'7 × 8 = ?',ans:56,choices:[42,48,56,64],hint:'Truco: piensa 7×8 como (7×4)×2 = 28×2 = 56'},
+    {q:'9 × 6 = ?',ans:54,choices:[45,54,63,56],hint:'Truco del 9: dígitos suman 9. ¿5+4=9? ✓'},
+    {q:'6 × 7 = ?',ans:42,choices:[36,42,48,49],hint:'Es la mitad de 12×7=84. O memoricen: 6×7=42'},
+    {q:'8 × 4 = ?',ans:32,choices:[24,28,32,36],hint:'Doblar dos veces: 4+4=8, 8+8=16, 16+16=32'},
+    {q:'9 × 7 = ?',ans:63,choices:[54,56,63,72],hint:'Truco del 9: 6+3=9 ✓'},
+    {q:'8 × 6 = ?',ans:48,choices:[42,48,54,56],hint:'8×6 es como 4×6=24, doblado: 48'},
+  ],function(){document.getElementById('t1-done').style.display='block'});
+},
+
+a2:function(){
+  runMiniQuiz('a2-quiz',[
+    {q:'5 × (6 + 4) = ?',ans:50,type:'input',hint:'5×6 + 5×4 = 30 + 20'},
+    {q:'3 × (4 + 2) = ?',ans:18,type:'input',hint:'3×4 + 3×2 = 12 + 6'},
+    {q:'6 × 12 = ?',ans:72,type:'input',hint:'Descompón 12 en 10+2: 6×10 + 6×2 = 60 + 12'},
+    {q:'4 × (5 + 3) = ?',ans:32,choices:[28,30,32,35],hint:'4×5 + 4×3 = 20 + 12'},
+    {q:'7 × 13 = ?',ans:91,type:'input',hint:'7×(10+3) = 70 + 21'},
+    {q:'8 × (5 + 2) = ?',ans:56,choices:[48,52,56,64],hint:'8×5 + 8×2 = 40 + 16'},
+    {q:'5 × 14 = ?',ans:70,type:'input',hint:'5×(10+4) = 50 + 20'},
+    {q:'9 × (3 + 1) = ?',ans:36,choices:[27,30,36,40],hint:'9×3 + 9×1 = 27 + 9'},
+  ],function(){document.getElementById('a2-done').style.display='block'});
+},
+
+a3:function(){
+  runMiniQuiz('a3-quiz',[
+    {q:'8 × 0 = ?',ans:0,choices:[0,8,80,1],hint:'Cualquier número × 0 = ?'},
+    {q:'15 × 1 = ?',ans:15,choices:[1,14,15,16],hint:'Cualquier número × 1 = ?'},
+    {q:'1 × 247 = ?',ans:247,choices:[1,247,248,2470],hint:'No importa el orden: 247 × 1 = 1 × 247'},
+    {q:'0 × 999 = ?',ans:0,choices:[0,1,99,999],hint:'Cero por cualquier cosa = 0'},
+    {q:'1 × 1 = ?',ans:1,choices:[0,1,2,11],hint:'Uno por uno...'},
+    {q:'500 × 0 = ?',ans:0,choices:[0,5,50,500],hint:'Trampa: el 0 manda'},
+    {q:'1 × 86 = ?',ans:86,choices:[1,80,86,87],hint:'El 1 no cambia el otro número'},
+    {q:'0 + 7 = ?',ans:7,choices:[0,7,8,70],hint:'Atención: esta es SUMA, no multiplicación'},
+  ],function(){document.getElementById('a3-done').style.display='block'});
+},
+
+a4:function(){
+  runMiniQuiz('a4-quiz',[
+    {q:'24 × 3 = ?',ans:72,type:'input',hint:'3×4=12 (lleva 1), 3×2+1=7 → 72'},
+    {q:'37 × 4 = ?',ans:148,type:'input',hint:'4×7=28 (lleva 2), 4×3+2=14 → 148'},
+    {q:'45 × 6 = ?',ans:270,type:'input',hint:'6×5=30 (lleva 3), 6×4+3=27 → 270'},
+    {q:'58 × 7 = ?',ans:406,type:'input',hint:'7×8=56 (lleva 5), 7×5+5=40 → 406'},
+    {q:'23 × 12 = ?',ans:276,type:'input',hint:'23×2=46 + 23×10=230 → 276'},
+    {q:'35 × 24 = ?',ans:840,type:'input',hint:'35×4=140 + 35×20=700 → 840'},
+    {q:'41 × 15 = ?',ans:615,type:'input',hint:'41×5=205 + 41×10=410 → 615'},
+    {q:'62 × 13 = ?',ans:806,type:'input',hint:'62×3=186 + 62×10=620 → 806'},
+  ],function(){document.getElementById('a4-done').style.display='block'});
+},
+
+a5:function(){
+  runMiniQuiz('a5-quiz',[
+    {q:'63 ÷ 9 = ?',ans:7,choices:[6,7,8,9],hint:'Inversa: ¿qué × 9 = 63?'},
+    {q:'56 ÷ 8 = ?',ans:7,choices:[6,7,8,9],hint:'Inversa: ¿qué × 8 = 56?'},
+    {q:'48 ÷ 6 = ?',ans:8,choices:[7,8,9,6],hint:'Tabla del 6: ¿qué número da 48?'},
+    {q:'81 ÷ 9 = ?',ans:9,choices:[7,8,9,10],hint:'Truco del 9: 9×9=81'},
+    {q:'72 ÷ 8 = ?',ans:9,choices:[7,8,9,10],hint:'¿Qué × 8 = 72?'},
+    {q:'42 ÷ 7 = ?',ans:6,choices:[5,6,7,8],hint:'¿Qué × 7 = 42?'},
+    {q:'90 ÷ 9 = ?',ans:10,type:'input',hint:'Tabla del 9: 9×10=90'},
+    {q:'88 ÷ 1 = ?',ans:88,type:'input',hint:'Caso especial: N÷1 = N'},
+    {q:'15 ÷ 15 = ?',ans:1,type:'input',hint:'Caso especial: N÷N = 1'},
+    {q:'85 ÷ 9 = ? (estima el cociente)',ans:9,choices:[8,9,10,11],hint:'9×9=81 (cerca de 85), 9×10=90 (pasa). Cociente=9, resto=4'},
+  ],function(){document.getElementById('a5-done').style.display='block'});
+},
+
+a6:function(){
+  runMiniQuiz('a6-quiz',[
+    {q:'4 × (5 + 3) = ?',ans:32,type:'input',hint:'Distributiva: 4×5 + 4×3'},
+    {q:'56 ÷ 7 = ?',ans:8,choices:[6,7,8,9],hint:'¿Qué × 7 = 56?'},
+    {q:'9 × 1 = ?',ans:9,choices:[1,9,10,90],hint:'Propiedad del uno'},
+    {q:'72 ÷ 8 = ?',ans:9,choices:[7,8,9,10],hint:'Tabla del 8: ¿dónde está 72?'},
+    {q:'25 × 4 = ?',ans:100,type:'input',hint:'Prueba 25×(2+2) o 4×25'},
+    {q:'0 × 423 = ?',ans:0,choices:[0,4,423,4230],hint:'Propiedad del cero'},
+    {q:'48 × 5 = ?',ans:240,type:'input',hint:'Algoritmo: 5×8=40, 5×4+4=24'},
+    {q:'63 ÷ 9 = ?',ans:7,choices:[6,7,8,9],hint:'Inversa: 9×7=63'},
+    {q:'7 × (8 + 2) = ?',ans:70,type:'input',hint:'7×8 + 7×2 = 56 + 14'},
+    {q:'144 ÷ 12 = ?',ans:12,choices:[10,11,12,13],hint:'12×12=144 (cuadrado)'},
+  ],function(){document.getElementById('a6-done').style.display='block'});
+},
+
+a7:function(){document.getElementById('a7-stars').textContent=teamStars;},
+};
+
+// ─── MINI QUIZ RUNNER ───────────────────────────────
+function runMiniQuiz(containerId,questions,onDone){
+  var idx=0,okCount=0;
+  var container=document.getElementById(containerId);
+  container.className='quiz';
+  function render(){
+    if(idx>=questions.length){
+      container.innerHTML='<div style="text-align:center;padding:14px"><div style="font-size:2rem">🎉</div>'+
+        '<div style="font-family:\'Fredoka One\',cursive;font-size:1.2rem;color:#a8ff78;margin:6px 0">¡Mini-quiz terminado!</div>'+
+        '<div style="font-size:.85rem;color:#aaa">'+okCount+' de '+questions.length+' correctas</div></div>';
+      if(onDone)onDone();
+      return;
+    }
+    var q=questions[idx];
+    var dotsHtml='<div class="dots">';
+    for(var i=0;i<questions.length;i++){
+      var cls='dot';
+      if(i<idx)cls+=' '+(questions[i]._ok?'ok':'no');
+      else if(i===idx)cls+=' curr';
+      dotsHtml+='<div class="'+cls+'"></div>';
+    }
+    dotsHtml+='</div>';
+    var html='<div class="q-counter">PREGUNTA '+(idx+1)+' DE '+questions.length+'</div>';
+    html+='<div class="q-text">'+q.q+'</div>';
+    if(q.hint)html+='<div class="q-hint">💡 '+q.hint+'</div>';
+    if(q.type==='input'){
+      html+='<div class="input-row"><input class="ans-input" id="mq-input" type="number" placeholder="?"><button class="btn-check" id="mq-check">✅</button></div>';
+    }else{
+      html+='<div class="choices" id="mq-choices"></div>';
+    }
+    html+='<div class="fb" id="mq-fb"></div>';
+    html+='<button class="btn-next" id="mq-next">➡ Siguiente</button>';
+    html+=dotsHtml;
+    container.innerHTML=html;
+    if(q.type==='input'){
+      var inp=document.getElementById('mq-input');
+      var btn=document.getElementById('mq-check');
+      function checkInput(){
+        var v=parseInt(inp.value);if(isNaN(v))return;
+        var fb=document.getElementById('mq-fb');
+        if(v===q.ans){
+          inp.classList.add('ok');inp.disabled=true;btn.disabled=true;
+          fb.textContent='🤝 ¡Equipo gana ⭐!';fb.className='fb ok';
+          okCount++;questions[idx]._ok=true;addStar();rotateTurn();
+        }else{
+          inp.classList.add('no');inp.disabled=true;btn.disabled=true;
+          fb.textContent='💙 Era '+q.ans+' — ¡Revísenlo juntos!';fb.className='fb no';
+          questions[idx]._ok=false;sndNo();
+        }
+        document.getElementById('mq-next').classList.add('show');
+      }
+      inp.addEventListener('keydown',function(e){if(e.key==='Enter')checkInput()});
+      btn.addEventListener('click',checkInput);
+    }else{
+      var cs=document.getElementById('mq-choices');
+      var sh=q.choices.slice();sh.sort(function(){return Math.random()-.5});
+      for(var i=0;i<sh.length;i++){
+        (function(val){
+          var b=document.createElement('button');b.className='ch';b.textContent=val;
+          b.onclick=function(){
+            var bs=cs.querySelectorAll('.ch');for(var j=0;j<bs.length;j++)bs[j].disabled=true;
+            var fb=document.getElementById('mq-fb');
+            if(val===q.ans){
+              b.classList.add('ok');
+              fb.textContent='🤝 ¡Equipo gana ⭐!';fb.className='fb ok';
+              okCount++;questions[idx]._ok=true;addStar();rotateTurn();
+            }else{
+              b.classList.add('no');
+              for(var k=0;k<bs.length;k++)if(parseInt(bs[k].textContent)===q.ans)bs[k].classList.add('show-ok');
+              fb.textContent='💙 Era '+q.ans+' — ¡Revísenlo juntos!';fb.className='fb no';
+              questions[idx]._ok=false;sndNo();
+            }
+            document.getElementById('mq-next').classList.add('show');
+          };
+          cs.appendChild(b);
+        })(sh[i]);
+      }
+    }
+    document.getElementById('mq-next').onclick=function(){idx++;render()};
+  }
+  render();
+}
+
+renderHome();
+</script>
+</body>
+</html>
