@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRACCIÓN QUEST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07071a;
+  --bg2:#0e0e2a;
+  --panel:rgba(255,255,255,0.06);
+  --panel-border:rgba(255,255,255,0.12);
+  --gold:#ffd764;
+  --gold2:#ffaa00;
+  --red:#ff4d6d;
+  --green:#00e5a0;
+  --blue:#38bdf8;
+  --purple:#a855f7;
+  --white:#f0f4ff;
+  --muted:#8899bb;
+  --display:'Orbitron',sans-serif;
+  --body:'Nunito',sans-serif;
+  --radius:16px;
+  --radius-sm:10px;
+  --glow-gold:0 0 20px rgba(255,215,100,.4);
+  --glow-green:0 0 20px rgba(0,229,160,.35);
+  --glow-red:0 0 20px rgba(255,77,109,.35);
+  --glow-blue:0 0 20px rgba(56,189,248,.35);
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--white);font-family:var(--body);overflow:hidden;user-select:none}
+
+/* ── ANIMATED BG ── */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── SCREENS ── */
+.screen{display:none;width:100%;height:100vh;position:relative;overflow-y:auto;z-index:10}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* ── GLASS CARD ── */
+.glass{
+  background:var(--panel);
+  border:1px solid var(--panel-border);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-radius:var(--radius);
+}
+.glass-gold{border-color:rgba(255,215,100,.3);box-shadow:var(--glow-gold),inset 0 1px 0 rgba(255,255,255,.1)}
+.glass-green{border-color:rgba(0,229,160,.3);box-shadow:var(--glow-green),inset 0 1px 0 rgba(255,255,255,.08)}
+.glass-blue{border-color:rgba(56,189,248,.3);box-shadow:var(--glow-blue),inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:var(--display);font-size:13px;font-weight:700;
+  padding:14px 32px;border:none;border-radius:50px;cursor:pointer;
+  letter-spacing:1.5px;text-transform:uppercase;
+  transition:transform .15s,box-shadow .15s,filter .15s;
+  position:relative;overflow:hidden;
+}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);border-radius:inherit;}
+.btn:hover{transform:translateY(-3px);filter:brightness(1.1)}
+.btn:active{transform:translateY(1px)}
+.btn-gold{background:linear-gradient(135deg,#ffd764,#ff9f0a);color:#1a0a00;box-shadow:0 4px 24px rgba(255,180,0,.4),0 2px 0 rgba(0,0,0,.3)}
+.btn-gold:hover{box-shadow:0 8px 32px rgba(255,180,0,.6),0 2px 0 rgba(0,0,0,.3)}
+.btn-green{background:linear-gradient(135deg,#00e5a0,#00b37a);color:#001a12;box-shadow:0 4px 24px rgba(0,229,160,.4),0 2px 0 rgba(0,0,0,.3)}
+.btn-blue{background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#001a2a;box-shadow:0 4px 24px rgba(56,189,248,.4),0 2px 0 rgba(0,0,0,.3)}
+.btn-red{background:linear-gradient(135deg,#ff4d6d,#e11d48);color:#fff;box-shadow:0 4px 24px rgba(255,77,109,.4),0 2px 0 rgba(0,0,0,.3)}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;box-shadow:0 4px 24px rgba(168,85,247,.4),0 2px 0 rgba(0,0,0,.3)}
+.btn-ghost{background:var(--panel);border:1px solid var(--panel-border);color:var(--muted);box-shadow:none}
+.btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,.25)}
+.btn-sm{font-size:10px;padding:9px 20px;letter-spacing:1px}
+
+/* ── TITLE ── */
+#screen-title{gap:0;padding:20px}
+.title-eyebrow{font-family:var(--display);font-size:10px;letter-spacing:6px;color:var(--blue);text-transform:uppercase;margin-bottom:18px;opacity:.8}
+.title-logo{
+  font-family:var(--display);font-size:clamp(36px,8vw,72px);font-weight:900;
+  background:linear-gradient(135deg,#ffd764 0%,#ff9f0a 40%,#ff4d6d 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.1;text-align:center;margin-bottom:6px;
+  filter:drop-shadow(0 0 30px rgba(255,180,50,.4));
+  animation:logo-pulse 4s ease-in-out infinite;
+}
+@keyframes logo-pulse{0%,100%{filter:drop-shadow(0 0 30px rgba(255,180,50,.4))}50%{filter:drop-shadow(0 0 50px rgba(255,180,50,.7))}}
+.title-sub{font-size:14px;color:var(--muted);letter-spacing:2px;text-align:center;margin-bottom:36px}
+.title-card{padding:28px 36px;text-align:center;max-width:420px;width:90%}
+.title-features{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.title-feat{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+
+/* ── LOADING ── */
+#screen-loading{gap:24px}
+.loading-title{font-family:var(--display);font-size:14px;color:var(--gold);letter-spacing:3px}
+.loading-bar-wrap{width:min(360px,85vw);background:rgba(255,255,255,.06);border-radius:50px;height:8px;overflow:hidden;border:1px solid var(--panel-border)}
+.loading-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--gold),var(--red));width:0%;transition:width .4s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(255,180,0,.6)}
+.loading-theme{font-size:22px;font-weight:900;color:var(--white);margin-top:4px}
+.loading-msg{font-size:13px;color:var(--muted)}
+
+/* ── CUTSCENE ── */
+#screen-cutscene{gap:20px;padding:30px}
+.cutscene-hero{font-size:80px;text-align:center;filter:drop-shadow(0 0 30px rgba(255,200,0,.5));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.cutscene-card{max-width:560px;width:90%;padding:28px 32px}
+.cutscene-text{font-size:17px;line-height:1.9;color:var(--white);text-align:center;font-weight:700}
+
+/* ── LESSON ── */
+#screen-lesson{gap:0;padding:0;overflow-y:auto;justify-content:flex-start;padding-top:10px}
+.lesson-wrap{width:100%;max-width:680px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.lesson-header{
+  font-family:var(--display);font-size:10px;color:var(--blue);
+  text-align:center;letter-spacing:3px;padding:4px 0;
+}
+.lesson-subtitle{font-size:15px;font-weight:900;color:var(--white);text-align:center}
+.lesson-card{padding:20px 22px}
+.lesson-step-title{
+  font-family:var(--display);font-size:9px;color:var(--blue);
+  letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.lesson-step-num{
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#fff;border-radius:50%;width:22px;height:22px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;flex-shrink:0;
+}
+.lesson-text{font-size:15px;font-weight:700;line-height:1.9;color:var(--white)}
+
+/* fraction bars */
+.frac-visual{display:flex;flex-direction:column;align-items:center;gap:12px;margin:14px 0}
+.frac-bar-wrap{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
+.frac-cell{
+  height:38px;border-radius:8px;transition:background .5s,transform .3s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:#000;min-width:26px;
+  border:1px solid rgba(255,255,255,.1);
+}
+.frac-cell.filled{background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 2px 8px rgba(255,180,0,.3)}
+.frac-cell.filled2{background:linear-gradient(135deg,var(--blue),#0ea5e9);box-shadow:0 2px 8px rgba(56,189,248,.3)}
+.frac-cell.empty{background:rgba(255,255,255,.06)}
+.frac-label{font-family:var(--display);font-size:13px;color:var(--gold);font-weight:700}
+
+/* number line */
+.nline-track{position:absolute;top:20px;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--muted),transparent);border-radius:2px}
+.nline-dot{position:absolute;top:10px;width:24px;height:24px;border-radius:50%;transform:translateX(-50%);transition:left .7s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;z-index:2;box-shadow:0 0 12px currentColor}
+.nline-tick{position:absolute;top:14px;width:1px;height:14px;background:var(--muted);transform:translateX(-50%)}
+.nline-tick-label{position:absolute;top:30px;font-size:10px;font-weight:700;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.nline-val-label{position:absolute;font-size:10px;font-weight:900;transform:translateX(-50%);transition:left .7s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+
+/* ops chain */
+.ops-wrap{display:flex;flex-direction:column;gap:4px;align-items:center}
+.ops-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.ops-num{
+  font-family:var(--display);font-size:22px;font-weight:700;
+  color:var(--gold);min-width:60px;text-align:center;
+  padding:8px 14px;border-radius:12px;
+  background:rgba(255,215,100,.08);border:1px solid rgba(255,215,100,.2);
+}
+.ops-num.result-num{
+  background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.3);
+  color:var(--green);box-shadow:var(--glow-green);
+}
+.ops-arrow{font-size:18px;color:var(--muted);text-align:center}
+.ops-text-box{
+  background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);
+  padding:14px 18px;border-radius:12px;font-size:14px;font-weight:700;
+  color:var(--blue);white-space:pre-line;line-height:1.9;text-align:center;
+}
+
+/* lesson dots + nav */
+.lesson-dots{display:flex;gap:8px;align-items:center;justify-content:center;padding:4px 0}
+.lesson-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s}
+.lesson-dot.active{background:var(--gold);box-shadow:0 0 8px rgba(255,215,100,.5);width:24px;border-radius:4px}
+
+/* ── MAP ── */
+#screen-map{gap:16px;padding:24px}
+.map-hud{
+  display:flex;gap:16px;align-items:center;justify-content:center;
+  flex-wrap:wrap;font-family:var(--display);font-size:10px;
+  padding:12px 24px;width:100%;max-width:700px;letter-spacing:1px;
+}
+.hud-item{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.hud-val{color:var(--white);font-weight:700}
+.map-theme{
+  font-family:var(--display);font-size:11px;letter-spacing:3px;
+  padding:10px 24px;border-radius:50px;
+  background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(56,189,248,.2));
+  border:1px solid rgba(168,85,247,.3);color:var(--white);
+}
+.map-subtitle{font-size:13px;color:var(--muted);letter-spacing:1px}
+.map-container{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px}
+.world-node{
+  width:130px;height:130px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  text-align:center;transition:transform .2s,box-shadow .2s;
+  font-family:var(--body);font-weight:900;border-radius:20px;
+  position:relative;overflow:hidden;
+}
+.world-node::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);border-radius:inherit}
+.world-node:not(.locked):hover{transform:scale(1.08) translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.world-node.locked{opacity:.3;cursor:not-allowed;filter:grayscale(1)}
+.node-icon{font-size:40px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.node-name{color:var(--white);font-size:11px;line-height:1.4;padding:0 6px}
+.node-score{color:var(--green);font-size:11px}
+.map-connector{font-size:20px;color:rgba(255,255,255,.2)}
+.map-hint{font-size:11px;color:var(--muted);text-align:center;letter-spacing:.5px}
+
+/* ── PAUSE / FIXED UI ── */
+#pause-btn{
+  position:fixed;top:12px;left:14px;z-index:500;
+  font-family:var(--display);font-size:9px;letter-spacing:1px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--muted);padding:8px 14px;cursor:pointer;border-radius:50px;
+  backdrop-filter:blur(10px);transition:all .2s;display:none;
+}
+#pause-btn:hover{color:var(--white);border-color:rgba(255,255,255,.3)}
+#pause-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(7,7,26,.85);backdrop-filter:blur(20px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+}
+#pause-overlay.show{display:flex}
+.pause-title{font-family:var(--display);font-size:clamp(22px,4vw,36px);color:var(--gold);letter-spacing:4px}
+#session-chrono{
+  position:fixed;top:12px;right:14px;z-index:200;
+  font-family:var(--display);font-size:11px;color:var(--gold);
+  background:rgba(255,215,100,.06);border:1px solid rgba(255,215,100,.2);
+  padding:6px 14px;border-radius:50px;display:none;letter-spacing:1px;
+}
+
+/* ── BATTLE ── */
+#screen-battle{flex-direction:column;padding:10px 12px;gap:8px;overflow-y:auto;justify-content:flex-start;padding-top:14px}
+.battle-top{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:720px;flex-wrap:wrap;gap:6px}
+.hearts{font-size:20px;letter-spacing:2px}
+.battle-score-box{font-family:var(--display);font-size:10px;color:var(--gold);letter-spacing:1px;text-align:right}
+.streak-badge{
+  font-family:var(--display);font-size:9px;letter-spacing:1px;
+  background:linear-gradient(135deg,rgba(255,100,0,.3),rgba(255,180,0,.2));
+  border:1px solid rgba(255,150,0,.3);color:var(--gold);
+  padding:4px 12px;border-radius:50px;min-height:26px;display:flex;align-items:center;
+  box-shadow:0 0 12px rgba(255,150,0,.2);
+}
+
+/* BATTLE SCENE — canvas-based */
+.battle-scene{
+  width:100%;max-width:720px;height:110px;position:relative;overflow:hidden;
+  border-radius:16px;border:1px solid var(--panel-border);
+  background:linear-gradient(180deg,#0a0a20 0%,#1a1a3a 100%);
+}
+#battle-canvas{position:absolute;inset:0;width:100%;height:100%}
+.battle-player{position:absolute;bottom:12px;left:28px;font-size:36px;z-index:5;
+  animation:hero-idle 1.5s ease-in-out infinite;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6))}
+.battle-enemy{position:absolute;bottom:12px;right:28px;font-size:40px;z-index:5;
+  transform:scaleX(-1);animation:enemy-bob 2s ease-in-out infinite;filter:drop-shadow(0 6px 12px rgba(255,0,0,.3))}
+@keyframes hero-idle{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-5px) scaleY(.97)}}
+@keyframes enemy-bob{0%,100%{transform:scaleX(-1) scale(1)}50%{transform:scaleX(-1) scale(1.06)}}
+.enemy-hp-area{position:absolute;top:8px;right:12px;z-index:5}
+.enemy-hp-label{font-family:var(--display);font-size:7px;color:rgba(255,255,255,.6);margin-bottom:3px;letter-spacing:1px}
+.enemy-hp-track{width:100px;height:6px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.enemy-hp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#ff4d6d,#ff9f0a);transition:width .5s;box-shadow:0 0 6px rgba(255,80,80,.5)}
+.battle-world-chip{
+  position:absolute;top:8px;left:10px;z-index:5;
+  font-family:var(--display);font-size:7px;letter-spacing:1px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.6);padding:3px 8px;border-radius:50px;
+  backdrop-filter:blur(6px);
+}
+
+/* DIALOG */
+.battle-dialog{
+  width:100%;max-width:720px;padding:10px 16px;
+  border-left:3px solid var(--gold);background:rgba(255,215,100,.04);
+  border-radius:0 12px 12px 0;
+}
+.dialog-speaker{font-family:var(--display);font-size:8px;color:var(--gold);margin-bottom:3px;letter-spacing:1.5px}
+.dialog-text{font-size:14px;line-height:1.7;color:var(--white);font-weight:700}
+
+/* QUESTION BOX */
+.question-box{width:100%;max-width:720px;padding:14px 16px}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.q-counter{font-family:var(--display);font-size:8px;color:var(--muted);letter-spacing:1px}
+.q-topic{
+  font-family:var(--display);font-size:8px;letter-spacing:1px;
+  background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);
+  color:var(--blue);padding:3px 10px;border-radius:50px;
+}
+.question-text{
+  font-size:clamp(15px,2.5vw,19px);color:var(--white);
+  line-height:1.8;margin-bottom:14px;text-align:center;font-weight:800;
+}
+
+/* HINTS ROW */
+.hint-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.hint-pill{
+  font-family:var(--display);font-size:8px;letter-spacing:1px;
+  background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);
+  color:var(--blue);padding:7px 14px;cursor:pointer;border-radius:50px;transition:all .2s;
+}
+.hint-pill:hover{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.4)}
+.hint-pill:disabled{opacity:.3;cursor:not-allowed}
+.showhow-pill{
+  font-family:var(--display);font-size:8px;letter-spacing:1px;
+  background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);
+  color:var(--purple);padding:7px 14px;cursor:pointer;border-radius:50px;transition:all .2s;
+}
+.showhow-pill:hover{background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4)}
+.hint-reveal{
+  background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);
+  border-radius:12px;padding:10px 14px;margin-bottom:10px;
+  font-size:13px;color:var(--blue);line-height:1.8;font-weight:700;display:none;
+}
+.hint-reveal.show{display:block}
+
+/* OPTIONS GRID */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.option-btn{
+  font-family:var(--body);font-size:clamp(13px,2vw,15px);font-weight:800;
+  padding:16px 14px;color:var(--white);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;text-align:left;line-height:1.5;
+  transition:all .15s;border-radius:14px;
+  position:relative;overflow:hidden;
+}
+.option-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.06),transparent);
+  border-radius:inherit;pointer-events:none;
+}
+.option-btn:hover:not(:disabled){
+  background:rgba(255,255,255,.1);border-color:rgba(255,215,100,.4);
+  color:var(--gold);transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+.option-btn.correct{
+  background:linear-gradient(135deg,rgba(0,229,160,.2),rgba(0,179,122,.15));
+  border-color:rgba(0,229,160,.5);color:var(--green);
+  box-shadow:var(--glow-green);animation:pop .35s ease;
+}
+.option-btn.wrong{
+  background:linear-gradient(135deg,rgba(255,77,109,.2),rgba(200,50,80,.15));
+  border-color:rgba(255,77,109,.5);color:var(--red);
+  animation:shake .3s ease;
+}
+.option-btn.eliminated{opacity:.15;pointer-events:none}
+.option-btn:disabled{cursor:not-allowed}
+.opt-letter{
+  font-family:var(--display);font-size:9px;color:var(--gold);
+  display:block;margin-bottom:4px;letter-spacing:1px;
+}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* EXPLANATION */
+.explanation-reveal{
+  border-radius:12px;padding:12px 16px;margin-top:10px;
+  font-size:13px;line-height:1.8;font-weight:700;display:none;
+}
+.explanation-reveal.show{display:block}
+.next-wrap{text-align:center;margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ── VISUAL PANEL ── */
+#visual-panel{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(7,7,26,.92);backdrop-filter:blur(24px);
+  display:none;flex-direction:column;align-items:center;
+  justify-content:flex-start;overflow-y:auto;padding:16px;
+}
+#visual-panel.show{display:flex}
+.vp-wrap{width:100%;max-width:660px;display:flex;flex-direction:column;gap:12px;padding-bottom:24px}
+.vp-header{font-family:var(--display);font-size:11px;color:var(--gold);text-align:center;padding:4px 0;letter-spacing:2px}
+.vp-question{
+  font-size:16px;font-weight:800;color:var(--white);text-align:center;
+  line-height:1.6;padding:14px 16px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;
+}
+.vp-step{
+  padding:16px 18px;border-radius:14px;
+  background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);
+  border-left:3px solid var(--blue);
+  opacity:0;transform:translateY(12px);transition:opacity .4s,transform .4s;
+}
+.vp-step.visible{opacity:1;transform:translateY(0)}
+.vp-step-num{font-family:var(--display);font-size:8px;color:var(--blue);margin-bottom:6px;letter-spacing:2px}
+.vp-step-text{font-size:15px;font-weight:700;color:var(--white);line-height:1.9;white-space:pre-line}
+.vp-step-visual{margin-top:12px}
+.vp-answer{
+  font-family:var(--display);font-size:12px;color:var(--green);text-align:center;
+  padding:16px;border-radius:14px;
+  background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.25);
+  opacity:0;transition:opacity .5s;white-space:pre-line;line-height:2;letter-spacing:.5px;
+}
+.vp-answer.show{opacity:1}
+.vp-close-row{display:flex;justify-content:center;gap:12px;padding:8px 0}
+
+/* ── RESULTS ── */
+#screen-results{gap:16px;padding:24px;text-align:center}
+.results-title{font-family:var(--display);font-size:clamp(11px,2.5vw,18px);color:var(--gold);letter-spacing:2px}
+.results-grade{
+  font-family:var(--display);font-size:clamp(48px,10vw,80px);font-weight:900;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(0,229,160,.4));
+}
+.results-grade.bad{background:linear-gradient(135deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;}
+.results-stats{font-size:14px;line-height:2.4;color:var(--green);font-weight:700;padding:14px 20px}
+.results-msg{font-size:15px;color:var(--muted);max-width:400px;line-height:1.9;font-weight:700}
+.stars-row{font-size:32px;letter-spacing:8px;filter:drop-shadow(0 0 10px rgba(255,215,100,.5))}
+
+/* ── GAMEOVER ── */
+#screen-gameover{gap:18px;text-align:center;padding:24px}
+.go-title{
+  font-family:var(--display);font-size:clamp(20px,5vw,42px);
+  background:linear-gradient(135deg,var(--red),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:3px;animation:float 2.5s infinite;
+}
+
+/* ── VICTORY ── */
+#screen-victory{gap:16px;padding:24px;text-align:center}
+.victory-title{
+  font-family:var(--display);font-size:clamp(14px,3.5vw,28px);
+  color:var(--gold);letter-spacing:2px;
+  filter:drop-shadow(0 0 20px rgba(255,215,100,.4));
+}
+
+/* ── EFFECTS ── */
+#effect-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .12s;font-size:90px;filter:drop-shadow(0 0 30px currentColor)}
+#effect-overlay.show{opacity:1}
+#streak-toast{
+  position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:200;
+  font-family:var(--display);font-size:11px;letter-spacing:1px;
+  padding:10px 22px;border-radius:50px;
+  background:linear-gradient(135deg,rgba(255,150,0,.9),rgba(255,50,50,.8));
+  border:1px solid rgba(255,200,0,.4);color:#fff;
+  box-shadow:0 0 24px rgba(255,120,0,.5);
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;
+}
+#streak-toast.show{opacity:1}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,215,100,.3);border-radius:4px}
+
+/* ── AUDIO CONTROLS ── */
+#audio-controls{
+  position:fixed;bottom:14px;right:14px;z-index:400;
+  display:flex;flex-direction:column;gap:6px;align-items:flex-end;
+}
+.audio-panel{
+  background:rgba(7,7,26,.85);border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(16px);border-radius:14px;
+  padding:10px 14px;display:flex;flex-direction:column;gap:8px;
+  min-width:170px;
+}
+.audio-row{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:8px;color:var(--muted);letter-spacing:1px;}
+.audio-row input[type=range]{
+  flex:1;height:4px;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,.15);border-radius:2px;cursor:pointer;outline:none;
+}
+.audio-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 6px rgba(255,215,100,.5);}
+.audio-toggle{
+  font-family:var(--display);font-size:9px;letter-spacing:1px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--muted);padding:7px 12px;cursor:pointer;border-radius:50px;
+  backdrop-filter:blur(10px);transition:all .2s;
+}
+.audio-toggle:hover{color:var(--white);border-color:rgba(255,215,100,.3)}
+#audio-panel-wrap{display:none}
+#audio-panel-wrap.open{display:flex;flex-direction:column;gap:6px}
+
+
+@media(max-width:520px){
+  .options-grid{grid-template-columns:1fr}
+  .btn{font-size:11px;padding:12px 22px}
+  .battle-scene{height:88px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="session-chrono"><span id="chrono-display">00:00</span></div>
+<button id="pause-btn" onclick="togglePause()">⏸ PAUSA</button>
+<div id="effect-overlay"></div>
+<div id="streak-toast"></div>
+
+<!-- PAUSE -->
+<div id="pause-overlay">
+  <div class="pause-title">PAUSA</div>
+  <div style="font-size:14px;color:var(--muted);font-weight:700;">El juego está detenido</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+    <button class="btn btn-gold" onclick="togglePause()">► CONTINUAR</button>
+    <button class="btn btn-ghost" onclick="goToTitle()">⌂ MENÚ</button>
+  </div>
+</div>
+
+<!-- VISUAL PANEL -->
+<div id="visual-panel">
+  <div class="vp-wrap" id="vp-wrap">
+    <div class="vp-header" id="vp-header">📖 ¿CÓMO SE RESUELVE?</div>
+    <div class="vp-question" id="vp-question"></div>
+    <div id="vp-steps"></div>
+    <div class="vp-answer" id="vp-answer"></div>
+    <div class="vp-close-row"><button class="btn btn-green" onclick="closeVisualPanel()">✓ ENTENDIDO</button></div>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div id="screen-title" class="screen active">
+  <div class="title-eyebrow">Profe Quilamapu · 6° Básico</div>
+  <div class="title-logo">FRACCIÓN<br>QUEST</div>
+  <div class="title-sub">Fracciones &amp; Decimales</div>
+  <div class="glass glass-gold title-card">
+    <button class="btn btn-gold" style="width:100%;font-size:15px;padding:18px;" onclick="startLoading()">► NUEVA AVENTURA</button>
+    <div class="title-features">
+      <div class="title-feat">🎮 8 Temáticas</div>
+      <div class="title-feat">📖 Mini-Lecciones</div>
+      <div class="title-feat">💡 Explicación Visual</div>
+      <div class="title-feat">🏆 200 Preguntas</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="screen-loading" class="screen">
+  <div class="loading-title">PREPARANDO AVENTURA</div>
+  <div class="loading-theme" id="load-theme"></div>
+  <div style="width:min(360px,85vw)">
+    <div class="loading-bar-wrap"><div class="loading-bar-fill" id="load-bar"></div></div>
+  </div>
+  <div class="loading-msg" id="load-msg">Iniciando...</div>
+</div>
+
+<!-- CUTSCENE -->
+<div id="screen-cutscene" class="screen">
+  <div class="cutscene-hero" id="cutscene-art">🤠</div>
+  <div class="glass glass-gold cutscene-card"><div class="cutscene-text" id="cutscene-text"></div></div>
+  <button class="btn btn-gold" onclick="goToLesson(0)">► ¡COMENZAR AVENTURA!</button>
+</div>
+
+<!-- LESSON -->
+<div id="screen-lesson" class="screen">
+  <div class="lesson-wrap">
+    <div class="lesson-header" id="lesson-header">📚 MINI-LECCIÓN</div>
+    <div class="lesson-subtitle" id="lesson-subtitle"></div>
+    <div id="lesson-content"></div>
+    <div class="lesson-dots" id="lesson-dots"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding-bottom:10px;">
+      <button class="btn btn-blue btn-sm" id="lesson-prev" onclick="lessonPrev()" style="display:none;">◀ ANTERIOR</button>
+      <button class="btn btn-gold btn-sm" id="lesson-next" onclick="lessonNext()">SIGUIENTE ▶</button>
+      <button class="btn btn-ghost btn-sm" onclick="skipLesson()">SALTAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="screen-map" class="screen">
+  <div class="glass map-hud">
+    <div class="hud-item">❤️ <span class="hud-val" id="map-hearts"></span></div>
+    <div class="hud-item">⭐ <span class="hud-val" id="map-score">0</span></div>
+    <div class="hud-item">🔥 <span class="hud-val" id="map-streak">0</span></div>
+    <div class="hud-item">⏱ <span class="hud-val" id="map-chrono">00:00</span></div>
+  </div>
+  <div class="map-theme" id="map-theme-badge"></div>
+  <div class="map-subtitle">— Elige tu próximo mundo —</div>
+  <div class="map-container" id="map-container"></div>
+  <div class="map-hint">Cada mundo tiene mini-lección · 💡 Pistas · 📖 Explicación visual al error</div>
+</div>
+
+<!-- BATTLE -->
+<div id="screen-battle" class="screen">
+  <div class="battle-top">
+    <div><div class="hearts" id="battle-hearts"></div></div>
+    <div><div class="streak-badge" id="streak-display"></div></div>
+    <div><div class="battle-score-box">⭐ <span id="battle-score">0</span></div><div style="font-family:var(--display);font-size:8px;color:var(--muted);text-align:right;margin-top:2px;" id="battle-progress"></div></div>
+  </div>
+
+  <div class="battle-scene">
+    <canvas id="battle-canvas"></canvas>
+    <div class="battle-player" id="player-sprite">🧙</div>
+    <div class="battle-enemy" id="enemy-sprite">👾</div>
+    <div class="battle-world-chip" id="battle-world-name"></div>
+    <div class="enemy-hp-area">
+      <div class="enemy-hp-label" id="enemy-name-label">ENEMIGO</div>
+      <div class="enemy-hp-track"><div class="enemy-hp-fill" id="enemy-hp-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="battle-dialog">
+    <div class="dialog-speaker" id="dialog-speaker"></div>
+    <div class="dialog-text" id="dialog-text"></div>
+  </div>
+
+  <div class="glass question-box">
+    <div class="q-meta"><div class="q-counter" id="q-counter"></div><div class="q-topic" id="q-topic"></div></div>
+    <div class="question-text" id="question-text"></div>
+    <div class="hint-row">
+      <button class="hint-pill" id="hint-btn" onclick="useHint()">💡 PISTA (<span id="hint-count">2</span>)</button>
+      <button class="showhow-pill" onclick="showHowItWorks()">📖 ¿CÓMO SE HACE?</button>
+    </div>
+    <div class="hint-reveal" id="hint-box"></div>
+    <div class="options-grid" id="options-grid"></div>
+    <div class="explanation-reveal" id="explanation-box"></div>
+    <div class="next-wrap" id="next-btn-wrap" style="display:none;">
+      <button class="btn btn-gold btn-sm" onclick="proceedNext()">► SIGUIENTE</button>
+      <button class="btn btn-purple btn-sm" onclick="showHowItWorks()">📖 VER SOLUCIÓN</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="results-title" id="results-title"></div>
+  <div class="stars-row" id="results-stars"></div>
+  <div class="results-grade" id="results-grade"></div>
+  <div class="glass glass-green" style="max-width:420px;width:90%"><div class="results-stats" id="results-stats"></div></div>
+  <div class="results-msg" id="results-msg"></div>
+  <button class="btn btn-gold" id="results-continue-btn" onclick="continueAfterWorld()">► CONTINUAR</button>
+</div>
+
+<!-- GAMEOVER -->
+<div id="screen-gameover" class="screen">
+  <div style="font-size:72px;animation:float 2.5s infinite;filter:drop-shadow(0 0 24px rgba(255,80,80,.5))">💔</div>
+  <div class="go-title">SIN VIDAS</div>
+  <div style="font-size:15px;font-weight:700;color:var(--muted);max-width:360px;line-height:1.9;text-align:center;">¡No te rindas! Puedes seguir practicando sin vidas.</div>
+  <div class="glass" style="font-size:13px;padding:16px 24px;color:var(--green);line-height:2.4;text-align:center;font-weight:700;max-width:320px;" id="gameover-stats"></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button class="btn btn-green" onclick="continueWithoutLives()">► SEGUIR SIN VIDAS</button>
+    <button class="btn btn-ghost" onclick="goToTitle()">⌂ MENÚ</button>
+  </div>
+</div>
+
+<!-- VICTORY -->
+<div id="screen-victory" class="screen">
+  <div style="font-size:72px;animation:float 1.8s infinite;filter:drop-shadow(0 0 30px rgba(255,215,100,.6))">🏆</div>
+  <div class="victory-title" id="victory-title"></div>
+  <div class="stars-row" id="victory-stars"></div>
+  <div class="glass glass-gold" style="padding:20px 28px;text-align:center;max-width:440px;width:90%;">
+    <div class="results-grade" id="victory-grade"></div>
+    <div style="font-size:13px;color:var(--green);margin-top:8px;line-height:2.4;font-weight:700;" id="victory-stats"></div>
+  </div>
+  <div style="font-size:15px;color:var(--muted);text-align:center;max-width:400px;line-height:1.9;font-weight:700;" id="victory-msg"></div>
+  <button class="btn btn-gold" onclick="goToTitle()">► JUGAR DE NUEVO</button>
+  <div style="font-family:var(--display);font-size:8px;color:var(--muted);margin-top:8px;letter-spacing:2px;">🏫 PROFE QUILAMAPU</div>
+</div>
+
+<script>
+/* ── ANIMATED BACKGROUND ── */
+function initBgCanvas(){
+  const c=document.getElementById('bg-canvas');
+  const ctx=c.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;particles=[];for(let i=0;i<120;i++)particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.3,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,a:Math.random(),da:Math.random()*.008+.003,color:Math.random()<.5?'255,215,100':Math.random()<.5?'56,189,248':'168,85,247'});}
+  resize();window.addEventListener('resize',resize);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#07071a';ctx.fillRect(0,0,W,H);
+    // nebula
+    const g=ctx.createRadialGradient(W*.3,H*.4,0,W*.3,H*.4,W*.5);
+    g.addColorStop(0,'rgba(100,50,200,.08)');g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    const g2=ctx.createRadialGradient(W*.75,H*.6,0,W*.75,H*.6,W*.4);
+    g2.addColorStop(0,'rgba(30,100,200,.06)');g2.addColorStop(1,'transparent');
+    ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);
+    // stars
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.a+=p.da;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      const a=.15+.75*(Math.sin(p.a)*.5+.5);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.color},${a})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ── BATTLE CANVAS ── */
+let battleCtx,battleW,battleH,battleParticles=[],battleFrame=0;
+function initBattleCanvas(){
+  const c=document.getElementById('battle-canvas');
+  battleCtx=c.getContext('2d');
+  battleW=c.width=c.offsetWidth||720;battleH=c.height=c.offsetHeight||110;
+  battleParticles=[];
+  for(let i=0;i<30;i++)battleParticles.push({x:Math.random()*battleW,y:Math.random()*battleH*.7,r:Math.random()*1.4+.4,v:Math.random()*.3+.1,a:Math.random()});
+  function loop(){
+    battleFrame++;
+    battleCtx.clearRect(0,0,battleW,battleH);
+    const grad=battleCtx.createLinearGradient(0,0,0,battleH);
+    grad.addColorStop(0,'#0a0a22');grad.addColorStop(1,'#1a1a3a');
+    battleCtx.fillStyle=grad;battleCtx.fillRect(0,0,battleW,battleH);
+    // ground line
+    battleCtx.strokeStyle='rgba(255,215,100,.1)';battleCtx.lineWidth=1;
+    battleCtx.beginPath();battleCtx.moveTo(0,battleH-20);battleCtx.lineTo(battleW,battleH-20);battleCtx.stroke();
+    // particles
+    battleParticles.forEach(p=>{
+      p.x+=p.v;p.a+=.015;if(p.x>battleW)p.x=-5;
+      const a=.2+.6*(Math.sin(p.a)*.5+.5);
+      battleCtx.beginPath();battleCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      battleCtx.fillStyle=`rgba(255,215,100,${a})`;battleCtx.fill();
+    });
+    // aura glow player
+    if(battleFrame%2===0){
+      const ax=50,ay=battleH-28;
+      battleCtx.beginPath();battleCtx.arc(ax,ay,18+Math.sin(battleFrame*.05)*3,0,Math.PI*2);
+      battleCtx.fillStyle='rgba(255,215,100,.06)';battleCtx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+
+const QB=[
+  /* ── TOPIC: ¿QUÉ ES UNA FRACCIÓN? (Módulo 1) ── */
+  {q:"¿Qué representa el DENOMINADOR de una fracción?",opts:["Las partes que se toman","Las partes iguales en que se divide el entero","El resultado de la división","El valor total"],ans:1,topic:"¿Qué es?",hint:"El denominador está ABAJO. Indica en cuántas partes se divide el entero.",explain:"El denominador indica en cuántas partes iguales está dividido el entero.",vtype:"bar_dec",vdata:{num:2,den:5,decimal:"2/5"}},
+  {q:"¿Qué representa el NUMERADOR de una fracción?",opts:["Las partes iguales del entero","El valor del entero","Las partes que se toman","El total de partes"],ans:2,topic:"¿Qué es?",hint:"El numerador está ARRIBA. Indica cuántas partes se toman.",explain:"El numerador indica cuántas partes de las totales se están tomando.",vtype:"bar_dec",vdata:{num:3,den:5,decimal:"3/5"}},
+  {q:"En la fracción 3/8, ¿cuántas partes tiene el entero en total?",opts:["3","8","11","5"],ans:1,topic:"¿Qué es?",hint:"El denominador (abajo) indica el total de partes.",explain:"El denominador es 8, por lo tanto el entero está dividido en 8 partes iguales.",vtype:"bar_dec",vdata:{num:3,den:8,decimal:"3/8"}},
+  {q:"En la fracción 5/9, ¿cuántas partes se están tomando?",opts:["9","5","4","14"],ans:1,topic:"¿Qué es?",hint:"El numerador (arriba) indica las partes tomadas.",explain:"El numerador es 5, entonces se toman 5 partes de las 9 totales.",vtype:"bar_dec",vdata:{num:5,den:9,decimal:"5/9"}},
+  {q:"¿Qué fracción representa la zona coloreada de una barra dividida en 4 partes si 3 están coloreadas?",opts:["4/3","1/4","3/4","3/3"],ans:2,topic:"¿Qué es?",hint:"Partes coloreadas / partes totales.",explain:"3 partes coloreadas de 4 totales = 3/4.",vtype:"bar_dec",vdata:{num:3,den:4,decimal:"3/4"}},
+  {q:"Si divides una pizza en 6 partes iguales y comes 2, ¿qué fracción comiste?",opts:["2/8","1/3","2/6","6/2"],ans:2,topic:"¿Qué es?",hint:"Partes comidas sobre partes totales.",explain:"2 partes comidas de 6 totales = 2/6. (Que también equivale a 1/3, pero la fracción directa es 2/6.)",vtype:"bar_dec",vdata:{num:2,den:6,decimal:"2/6"}},
+  {q:"Una fracción donde el numerador es IGUAL al denominador, ¿cuánto vale?",opts:["0","Menos que 1","1","Más que 1"],ans:2,topic:"¿Qué es?",hint:"7/7 = ¿cuánto es 7 dividido 7?",explain:"Cuando numerador = denominador, la fracción es igual a 1 entero. Ej: 7/7 = 1.",vtype:"bar_dec",vdata:{num:6,den:6,decimal:"= 1"}},
+  {q:"¿Cuál de estas fracciones representa exactamente un entero?",opts:["3/4","5/5","2/3","7/8"],ans:1,topic:"¿Qué es?",hint:"¿En cuál el numerador es igual al denominador?",explain:"5/5 = 1 entero porque el numerador es igual al denominador.",vtype:"bar_dec",vdata:{num:5,den:5,decimal:"= 1"}},
+
+  /* ── TOPIC: TIPOS DE FRACCIONES (Módulo 1) ── */
+  {q:"¿Cuál es una fracción PROPIA?",opts:["11/5","8/8","3/10","9/4"],ans:2,topic:"Tipos",hint:"Fracción propia: numerador MENOR que denominador.",explain:"3/10 → 3 < 10 → numerador menor que denominador → fracción PROPIA.",vtype:"bar_dec",vdata:{num:3,den:10,decimal:"3/10"}},
+  {q:"¿Cuál es una fracción IMPROPIA?",opts:["2/7","6/11","4/9","15/6"],ans:3,topic:"Tipos",hint:"Fracción impropia: numerador MAYOR que denominador.",explain:"15/6 → 15 > 6 → numerador mayor que denominador → fracción IMPROPIA.",vtype:"bar_dec",vdata:{num:15,den:6,decimal:"15/6"}},
+  {q:"¿Cuál de estas es una fracción PROPIA?",opts:["7/3","9/9","8/5","4/7"],ans:3,topic:"Tipos",hint:"Propia: numerador < denominador.",explain:"4/7 → 4 < 7 → es fracción propia.",vtype:"bar_dec",vdata:{num:4,den:7,decimal:"4/7"}},
+  {q:"¿Cuál de estas es una fracción IMPROPIA?",opts:["3/8","5/12","7/4","1/6"],ans:2,topic:"Tipos",hint:"Impropia: numerador > denominador.",explain:"7/4 → 7 > 4 → es fracción impropia.",vtype:"bar_dec",vdata:{num:7,den:4,decimal:"7/4"}},
+  {q:"Convierte 17/5 a número mixto.",opts:["4 y 2/5","3 y 2/5","3 y 3/5","4 y 1/5"],ans:1,topic:"Tipos",hint:"17 ÷ 5 = ? con resto ?",explain:"17 ÷ 5 = 3 con resto 2 → número mixto: 3 y 2/5.",vtype:"ops_chain",vdata:{steps:["17 ÷ 5","cociente: 3","resto: 2","3 y 2/5"]}},
+  {q:"Convierte 2 y 3/7 a fracción impropia.",opts:["14/7","17/7","13/7","11/7"],ans:1,topic:"Tipos",hint:"(2×7) + 3 = ? y el denominador sigue siendo 7.",explain:"(2×7)+3 = 14+3 = 17 → fracción impropia: 17/7.",vtype:"ops_chain",vdata:{steps:["2 y 3/7","(2×7)+3","14+3=17","17/7"]}},
+  {q:"Convierte 13/4 a número mixto.",opts:["3 y 1/4","3 y 2/4","4 y 1/4","2 y 3/4"],ans:0,topic:"Tipos",hint:"13 ÷ 4 = ? con resto ?",explain:"13 ÷ 4 = 3 con resto 1 → número mixto: 3 y 1/4.",vtype:"ops_chain",vdata:{steps:["13 ÷ 4","cociente: 3","resto: 1","3 y 1/4"]}},
+  {q:"Convierte 3 y 2/5 a fracción impropia.",opts:["15/5","17/5","13/5","11/5"],ans:1,topic:"Tipos",hint:"(3×5)+2 = ?",explain:"(3×5)+2 = 15+2 = 17 → fracción impropia: 17/5.",vtype:"ops_chain",vdata:{steps:["3 y 2/5","(3×5)+2","15+2=17","17/5"]}},
+  {q:"Una fracción MIXTA se compone de:",opts:["Solo numerador y denominador","Un entero y una fracción propia","Dos fracciones sumadas","Un numerador mayor que el denominador"],ans:1,topic:"Tipos",hint:"Ejemplo de número mixto: 2 y 3/4.",explain:"Un número mixto tiene una parte entera y una fracción propia. Ej: 2 y 3/4.",vtype:"ops_chain",vdata:{steps:["Número mixto:","parte entera + fracción","Ej: 2 y 3/4","= 11/4"]}},
+  {q:"¿Cuál es un número MIXTO?",opts:["15/4","0,75","3 y 2/5","3/4"],ans:2,topic:"Tipos",hint:"Un número mixto tiene parte entera y fracción.",explain:"3 y 2/5 es un número mixto: parte entera 3, fracción 2/5.",vtype:"ops_chain",vdata:{steps:["3 y 2/5","parte entera: 3","fracción propia: 2/5","número mixto ✅"]}},
+
+  /* ── TOPIC: AMPLIFICACIÓN Y SIMPLIFICACIÓN (Módulo 2) ── */
+  {q:"Amplifica 2/3 por 5.",opts:["7/8","10/5","10/15","6/9"],ans:2,topic:"Amplif.",hint:"Multiplica numerador y denominador por 5.",explain:"2×5=10 y 3×5=15 → fracción amplificada: 10/15.",vtype:"bar_equiv",vdata:{num:2,den:3,eq_num:10,eq_den:15}},
+  {q:"Amplifica 3/4 por 3.",opts:["6/7","9/12","3/7","9/9"],ans:1,topic:"Amplif.",hint:"Multiplica numerador y denominador por 3.",explain:"3×3=9 y 4×3=12 → fracción amplificada: 9/12.",vtype:"bar_equiv",vdata:{num:3,den:4,eq_num:9,eq_den:12}},
+  {q:"Amplifica 1/5 por 4.",opts:["4/5","5/9","4/20","5/20"],ans:2,topic:"Amplif.",hint:"Multiplica numerador y denominador por 4.",explain:"1×4=4 y 5×4=20 → fracción amplificada: 4/20.",vtype:"bar_equiv",vdata:{num:1,den:5,eq_num:4,eq_den:20}},
+  {q:"Simplifica 18/24 a mínima expresión.",opts:["9/12","3/4","6/8","2/3"],ans:1,topic:"Amplif.",hint:"MCD(18,24)=6. Divide ambos por 6.",explain:"MCD(18,24)=6. 18÷6=3 y 24÷6=4 → mínima expresión: 3/4.",vtype:"bar_equiv",vdata:{num:18,den:24,eq_num:3,eq_den:4}},
+  {q:"Simplifica 15/25 a mínima expresión.",opts:["5/10","3/5","5/8","1/2"],ans:1,topic:"Amplif.",hint:"MCD(15,25)=5. Divide ambos por 5.",explain:"15÷5=3 y 25÷5=5 → mínima expresión: 3/5.",vtype:"bar_equiv",vdata:{num:15,den:25,eq_num:3,eq_den:5}},
+  {q:"Simplifica 12/16 a mínima expresión.",opts:["6/8","3/4","2/3","4/5"],ans:1,topic:"Amplif.",hint:"MCD(12,16)=4. Divide ambos por 4.",explain:"12÷4=3 y 16÷4=4 → mínima expresión: 3/4.",vtype:"bar_equiv",vdata:{num:12,den:16,eq_num:3,eq_den:4}},
+  {q:"Simplifica 20/30 a mínima expresión.",opts:["4/6","2/3","10/15","5/8"],ans:1,topic:"Amplif.",hint:"MCD(20,30)=10. Divide ambos por 10.",explain:"20÷10=2 y 30÷10=3 → mínima expresión: 2/3.",vtype:"bar_equiv",vdata:{num:20,den:30,eq_num:2,eq_den:3}},
+  {q:"¿Cuál es el primer paso para simplificar una fracción?",opts:["Multiplicar numerador y denominador","Encontrar el MCD de numerador y denominador","Sumar numerador y denominador","Convertirla a decimal"],ans:1,topic:"Amplif.",hint:"MCD = Máximo Común Divisor.",explain:"Para simplificar, primero se busca el MCD de numerador y denominador, luego se divide ambos por ese número.",vtype:"ops_chain",vdata:{steps:["Encontrar MCD","dividir num ÷ MCD","dividir den ÷ MCD","fracción simplificada"]}},
+  {q:"¿Amplificar una fracción cambia su valor?",opts:["Sí, la hace mayor","Sí, la hace menor","No, es una fracción equivalente","Sólo si se amplifica por un número par"],ans:2,topic:"Amplif.",hint:"Amplificar = multiplicar num y den por el mismo número.",explain:"Amplificar produce una fracción equivalente: el valor no cambia, solo cambian los números.",vtype:"bar_equiv",vdata:{num:1,den:2,eq_num:3,eq_den:6}},
+  {q:"Simplifica 8/20 a mínima expresión.",opts:["4/10","2/5","1/3","3/8"],ans:1,topic:"Amplif.",hint:"MCD(8,20)=4. Divide ambos por 4.",explain:"8÷4=2 y 20÷4=5 → mínima expresión: 2/5.",vtype:"bar_equiv",vdata:{num:8,den:20,eq_num:2,eq_den:5}},
+  {q:"Amplifica 2/5 por 6.",opts:["8/11","12/30","12/25","2/11"],ans:1,topic:"Amplif.",hint:"Multiplica numerador y denominador por 6.",explain:"2×6=12 y 5×6=30 → fracción amplificada: 12/30.",vtype:"bar_equiv",vdata:{num:2,den:5,eq_num:12,eq_den:30}},
+
+  /* ── TOPIC: EQUIVALENTES Y COMPARACIÓN (Módulo 3) ── */
+  {q:"¿Cuál par son fracciones EQUIVALENTES?",opts:["2/3 y 3/4","5/8 y 10/16","1/3 y 2/5","4/7 y 5/8"],ans:1,topic:"Equiv.",hint:"Fracciones equivalentes: al multiplicar o dividir num y den por el mismo número se obtiene la otra.",explain:"5/8 y 10/16: 5×2=10 y 8×2=16 ✓ Son equivalentes.",vtype:"bar_equiv",vdata:{num:5,den:8,eq_num:10,eq_den:16}},
+  {q:"¿Son equivalentes 3/4 y 9/12?",opts:["Sí","No","Solo si se simplifican","Depende del denominador"],ans:0,topic:"Equiv.",hint:"3×3=9 y 4×3=12. ¿Se multiplica por el mismo número?",explain:"3/4 amplificada por 3 = 9/12. Sí son equivalentes.",vtype:"bar_equiv",vdata:{num:3,den:4,eq_num:9,eq_den:12}},
+  {q:"¿Son equivalentes 2/5 y 6/15?",opts:["No","Sí","Solo en valor aproximado","No se puede saber"],ans:1,topic:"Equiv.",hint:"2×3=6 y 5×3=15.",explain:"2/5 amplificada por 3 = 6/15. Sí son equivalentes.",vtype:"bar_equiv",vdata:{num:2,den:5,eq_num:6,eq_den:15}},
+  {q:"Compara: ¿cuál es mayor, 5/6 o 7/9?",opts:["7/9","Son iguales","5/6","No se puede comparar"],ans:2,topic:"Equiv.",hint:"MCM(6,9)=18. Convierte ambas a 18vos.",explain:"5/6=15/18 y 7/9=14/18. Como 15>14, entonces 5/6 es mayor.",vtype:"nline",vdata:{vals:[{n:5,d:6,label:"5/6"},{n:7,d:9,label:"7/9"}]}},
+  {q:"¿Cuál es mayor: 3/4 o 2/3?",opts:["2/3","Son iguales","3/4","No se puede comparar"],ans:2,topic:"Equiv.",hint:"MCM(4,3)=12. Convierte ambas a 12avos.",explain:"3/4=9/12 y 2/3=8/12. Como 9>8, entonces 3/4 es mayor.",vtype:"nline",vdata:{vals:[{n:3,d:4,label:"3/4"},{n:2,d:3,label:"2/3"}]}},
+  {q:"¿Cuál es menor: 4/5 o 7/10?",opts:["4/5","7/10","Son iguales","No se puede comparar"],ans:1,topic:"Equiv.",hint:"4/5=8/10. Compara con 7/10.",explain:"4/5=8/10 y 7/10. Como 7<8, entonces 7/10 es menor.",vtype:"nline",vdata:{vals:[{n:7,d:10,label:"7/10"},{n:4,d:5,label:"4/5"}]}},
+  {q:"¿Cuál es mayor: 2/3 o 3/5?",opts:["3/5","Son iguales","2/3","No se puede comparar"],ans:2,topic:"Equiv.",hint:"MCM(3,5)=15. 2/3=10/15 y 3/5=9/15.",explain:"2/3=10/15 y 3/5=9/15. Como 10>9, entonces 2/3 es mayor.",vtype:"nline",vdata:{vals:[{n:2,d:3,label:"2/3"},{n:3,d:5,label:"3/5"}]}},
+  {q:"Para comparar 3/4 y 5/6, ¿cuál es el MCM de los denominadores?",opts:["24","10","12","8"],ans:2,topic:"Equiv.",hint:"MCM(4,6) = el menor múltiplo común de 4 y 6.",explain:"Múltiplos de 4: 4,8,12... Múltiplos de 6: 6,12... MCM=12.",vtype:"ops_chain",vdata:{steps:["MCM(4,6)","múlt. 4: 4,8,12","múlt. 6: 6,12","MCM = 12"]}},
+  {q:"Ordena de menor a mayor: 1/2, 1/3, 1/4",opts:["1/4 < 1/3 < 1/2","1/2 < 1/3 < 1/4","1/3 < 1/4 < 1/2","1/4 < 1/2 < 1/3"],ans:0,topic:"Equiv.",hint:"Mismo numerador: mayor denominador = fracción menor.",explain:"Mismo numerador 1: mayor denominador = menor fracción. Orden: 1/4 < 1/3 < 1/2.",vtype:"nline",vdata:{vals:[{n:1,d:4,label:"1/4"},{n:1,d:3,label:"1/3"},{n:1,d:2,label:"1/2"}]}},
+  {q:"¿Son equivalentes 4/6 y 2/3?",opts:["No","Sí","Solo aproximadamente","Depende del contexto"],ans:1,topic:"Equiv.",hint:"Simplifica 4/6 dividiendo por 2.",explain:"4÷2=2 y 6÷2=3 → 4/6=2/3. Sí son equivalentes.",vtype:"bar_equiv",vdata:{num:4,den:6,eq_num:2,eq_den:3}},
+
+  /* ── TOPIC: RECTA NUMÉRICA (Módulo 4) ── */
+  {q:"¿Entre qué enteros se ubica 11/4 en la recta numérica?",opts:["0 y 1","1 y 2","2 y 3","3 y 4"],ans:2,topic:"Recta",hint:"Divide 11÷4 y observa el cociente entero.",explain:"11÷4=2,75 → el cociente entero es 2 → se ubica entre 2 y 3.",vtype:"nline",vdata:{vals:[{n:11,d:4,label:"11/4=2,75"}]}},
+  {q:"¿En qué número exacto se ubica 12/4 en la recta numérica?",opts:["En el 2","En el 3","En el 4","Entre 2 y 3"],ans:1,topic:"Recta",hint:"12÷4 = número exacto.",explain:"12÷4=3 → se ubica exactamente en el entero 3.",vtype:"nline",vdata:{vals:[{n:12,d:4,label:"12/4=3"}]}},
+  {q:"¿Dónde se ubica 1/2 en la recta numérica entre 0 y 1?",opts:["Al inicio","Al final","Exactamente en el centro","En el cuarto"],ans:2,topic:"Recta",hint:"1/2 = 0,5. ¿Dónde está 0,5 entre 0 y 1?",explain:"1/2=0,5. Está exactamente en el centro entre 0 y 1.",vtype:"nline",vdata:{vals:[{n:1,d:2,label:"1/2"}]}},
+  {q:"¿Entre qué enteros se ubica 7/3?",opts:["0 y 1","1 y 2","2 y 3","3 y 4"],ans:2,topic:"Recta",hint:"7÷3 = ¿cuánto es el cociente entero?",explain:"7÷3=2,33... → el cociente entero es 2 → se ubica entre 2 y 3.",vtype:"nline",vdata:{vals:[{n:7,d:3,label:"7/3≈2,33"}]}},
+  {q:"¿Cuál es el valor decimal de 3/4 para ubicarlo en la recta?",opts:["0,34","0,75","0,43","0,7"],ans:1,topic:"Recta",hint:"3 ÷ 4 = ?",explain:"3÷4=0,75. En la recta, 3/4 se ubica en 0,75 (entre 0 y 1).",vtype:"nline",vdata:{vals:[{n:3,d:4,label:"3/4=0,75"}]}},
+  {q:"Ordena en la recta de menor a mayor: 3/2, 1/4, 5/4, 3/4",opts:["1/4 < 3/4 < 5/4 < 3/2","3/2 < 5/4 < 3/4 < 1/4","1/4 < 5/4 < 3/4 < 3/2","3/4 < 1/4 < 3/2 < 5/4"],ans:0,topic:"Recta",hint:"Convierte a cuartos: 3/2=6/4. Luego ordena.",explain:"En cuartos: 1/4, 3/4, 5/4, 6/4(=3/2). Orden: 1/4 < 3/4 < 5/4 < 3/2.",vtype:"nline",vdata:{vals:[{n:1,d:4,label:"1/4"},{n:3,d:4,label:"3/4"},{n:5,d:4,label:"5/4"},{n:3,d:2,label:"3/2"}]}},
+  {q:"¿Entre qué enteros se ubica 9/5?",opts:["0 y 1","1 y 2","2 y 3","3 y 4"],ans:1,topic:"Recta",hint:"9÷5 = 1,8. ¿Entre qué enteros está 1,8?",explain:"9÷5=1,8 → se ubica entre 1 y 2.",vtype:"nline",vdata:{vals:[{n:9,d:5,label:"9/5=1,8"}]}},
+  {q:"¿Cuál fracción se ubica MÁS CERCA del 0 en la recta numérica?",opts:["3/4","1/8","1/2","2/3"],ans:1,topic:"Recta",hint:"La fracción más pequeña está más cerca del 0.",explain:"1/8=0,125 es la más pequeña. Se ubica más cerca del 0.",vtype:"nline",vdata:{vals:[{n:1,d:8,label:"1/8"},{n:1,d:2,label:"1/2"},{n:3,d:4,label:"3/4"}]}},
+  {q:"¿Cuál fracción se ubica MÁS CERCA del 1 en la recta numérica?",opts:["1/4","1/2","3/8","7/8"],ans:3,topic:"Recta",hint:"La fracción más grande (pero menor que 1) está más cerca del 1.",explain:"7/8=0,875 es la más cercana a 1.",vtype:"nline",vdata:{vals:[{n:1,d:4,label:"1/4"},{n:1,d:2,label:"1/2"},{n:7,d:8,label:"7/8"}]}},
+  {q:"¿Dónde se ubica exactamente 6/3 en la recta numérica?",opts:["Entre 1 y 2","En el 3","En el 2","Entre 2 y 3"],ans:2,topic:"Recta",hint:"6÷3 = número exacto.",explain:"6÷3=2 → se ubica exactamente en el entero 2.",vtype:"nline",vdata:{vals:[{n:6,d:3,label:"6/3=2"}]}},
+];
+
+
+const THEMES=[
+  {id:"vaquero",name:"MUNDO VAQUERO 🤠",emoji:"🤠",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🐍 Serpiente","🦅 Buitre","🤠 Forajido Jefe"],player:"🤠",bgEmojis:["🌵","🏜️","⭐"],intro:"¡Eres el nuevo sheriff de Fraccionville! Tres bandidos robaron los números. Solo quien domine las fracciones puede atraparlos.",victory:"¡Fraccionville está a salvo! El Sheriff más matemático del Viejo Oeste ha triunfado. 🌟"},
+  {id:"espacial",name:"MISIÓN ESPACIAL 🚀",emoji:"🚀",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["☄️ Asteroide","🛸 OVNI","👾 Robot Jefe"],player:"👨‍🚀",bgEmojis:["⭐","🌙","🚀"],intro:"Comandante, alienígenas convirtieron los números en fracciones. Solo tú puedes resolver los enigmas y salvar la nave.",victory:"¡La galaxia está salva! Tu dominio de las fracciones venció a los alienígenas. 🚀"},
+  {id:"piratas",name:"PIRATAS DEL DECIMAL 🏴‍☠️",emoji:"🏴‍☠️",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🦈 Tiburón","🦜 Loro Guardián","☠️ Capitán Jefe"],player:"🏴‍☠️",bgEmojis:["🌊","⚓","🦜"],intro:"¡Argh! El Capitán Fracción robó el tesoro de los decimales. Para recuperarlo debes navegar tres mares con tus conocimientos matemáticos.",victory:"¡El tesoro decimal es tuyo! Nadie en los Siete Mares conoce las fracciones como tú. ☠️"},
+  {id:"medieval",name:"REINO MEDIEVAL ⚔️",emoji:"⚔️",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🐺 Lobo Oscuro","🐉 Dragón","🧙 Mago Jefe"],player:"🧙",bgEmojis:["🌲","⚔️","🏰"],intro:"El reino está maldito. El Mago Oscuro convirtió el oro en fracciones imposibles. ¡Desenvaina tu espada numérica!",victory:"¡El reino está liberado! La leyenda del Caballero de las Fracciones vivirá por siempre. ⚔️"},
+  {id:"ninja",name:"ACADEMIA NINJA 🥷",emoji:"🥷",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🦊 Zorro Ninja","🐯 Tigre Sensei","🥷 Gran Maestro"],player:"🥷",bgEmojis:["🌸","⛩️","🌙"],intro:"Joven ninja, para convertirte en maestro debes superar las tres pruebas del Templo de las Fracciones.",victory:"¡Eres el Gran Maestro Ninja de las Fracciones! Tu mente es más afilada que cualquier katana. 🥷"},
+  {id:"dinos",name:"ERA JURÁSICA 🦕",emoji:"🦕",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🦕 Braquiosaurio","🦎 Raptor","🦖 T-Rex Jefe"],player:"🧑‍🔬",bgEmojis:["🌿","🌋","🦴"],intro:"Tu máquina del tiempo te llevó al Jurásico. Para regresar debes recolectar datos matemáticos de los dinosaurios.",victory:"¡De vuelta al presente! Los dinosaurios nunca vieron a alguien tan bueno con las fracciones. 🦕"},
+  {id:"mapuche",name:"AVENTURA MAPUCHE 🌄",emoji:"🌄",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🦅 Cóndor","🐆 Puma","🌀 Espíritu Guardián"],player:"🦅",bgEmojis:["🌄","🌲","⭐"],intro:"La Machi necesita tu ayuda. Los números sagrados han sido fragmentados en fracciones. Recorre la cordillera, la costa y el bosque.",victory:"¡Newen! Has demostrado que las matemáticas son parte del küme mongen. 🌄"},
+  {id:"futuro",name:"CIUDAD DEL FUTURO 🤖",emoji:"🤖",worlds:["🍕 Tipos de Fracciones","⚖️ Amplif. y Equivalentes","📏 Recta Numérica"],worldEmojis:["🍕","⚖️","📏"],enemies:["🤖 Drone","💻 Virus","🧠 Superinteligencia"],player:"🦾",bgEmojis:["🏙️","⚡","🤖"],intro:"Año 2100. Una IA tomó control usando fracciones encriptadas. Solo un experto en matemáticas puede hackear sus defensas.",victory:"¡Sistema hackeado! La humanidad está libre. Eres el mejor matemático del futuro. 🤖"},
+];
+
+const LESSONS={
+  "¿Qué es?":{title:"¿Qué es una Fracción?",icon:"🍕",steps:[
+    {title:"Partes de una fracción",
+     text:"Una fracción representa partes de un entero.\n\n   NUMERADOR  → partes que se toman\n  ─────────────\n  DENOMINADOR → partes iguales del entero\n\nEjemplo: 3/4 = 3 partes de 4.",
+     visual:"bar_dec",data:{num:3,den:4,decimal:"3/4"}},
+    {title:"El denominador divide el entero",
+     text:"El denominador indica en cuántas partes iguales se divide el entero.\n\n4 → el entero se divide en 4 partes\n8 → el entero se divide en 8 partes",
+     visual:"bar_dec",data:{num:1,den:8,decimal:"1/8"}},
+    {title:"El numerador toma partes",
+     text:"El numerador indica cuántas partes de esas se toman.\n\nSi el entero tiene 5 partes y tomamos 3:\n→ La fracción es 3/5",
+     visual:"bar_dec",data:{num:3,den:5,decimal:"3/5"}},
+    {title:"Cuando num = den",
+     text:"Si el numerador es IGUAL al denominador, la fracción vale 1 entero.\n\n6/6 = 1\n9/9 = 1\n\n¡Se completó el entero!",
+     visual:"bar_dec",data:{num:6,den:6,decimal:"= 1 entero"}},
+  ]},
+  "Tipos":{title:"Tipos de Fracciones",icon:"📊",steps:[
+    {title:"Fracción PROPIA",
+     text:"El numerador es MENOR que el denominador.\n\nSu valor es menor que 1.\n\nEjemplos: 3/4 · 2/7 · 5/9",
+     visual:"bar_dec",data:{num:3,den:7,decimal:"3/7 → propia"}},
+    {title:"Fracción IMPROPIA",
+     text:"El numerador es MAYOR que el denominador.\n\nSu valor es mayor que 1.\n\nEjemplos: 7/4 · 9/5 · 15/6",
+     visual:"bar_dec",data:{num:7,den:4,decimal:"7/4 → impropia"}},
+    {title:"Número MIXTO",
+     text:"Tiene una parte ENTERA y una fracción PROPIA.\n\nEjemplo: 3 y 2/5\n\n→ Convierte a impropia: (3×5)+2 = 17/5",
+     visual:"ops_chain",data:{steps:["3 y 2/5","(3×5)+2","15+2=17","17/5"]}},
+    {title:"Fracción → Número mixto",
+     text:"Para convertir una fracción impropia a mixta:\n\n1. Divide numerador ÷ denominador\n2. El cociente es la parte entera\n3. El resto es el nuevo numerador\n\n17/5 → 17÷5=3 resto 2 → 3 y 2/5",
+     visual:"ops_chain",data:{steps:["17/5","17÷5 = 3 resto 2","parte entera: 3","→ 3 y 2/5"]}},
+  ]},
+  "Amplif.":{title:"Amplificación y Simplificación",icon:"⚖️",steps:[
+    {title:"¿Qué es amplificar?",
+     text:"Amplificar = multiplicar numerador Y denominador por el mismo número.\n\nEl valor de la fracción NO cambia.\n\n2/3 × (5/5) = 10/15",
+     visual:"bar_equiv",data:{num:2,den:3,eq_num:10,eq_den:15}},
+    {title:"¿Qué es simplificar?",
+     text:"Simplificar = dividir numerador Y denominador por el mismo número.\n\nBuscamos la MÍNIMA EXPRESIÓN.\n\n18/24 ÷ 6 = 3/4",
+     visual:"bar_equiv",data:{num:18,den:24,eq_num:3,eq_den:4}},
+    {title:"El MCD — Máximo Común Divisor",
+     text:"Para simplificar al máximo, divide por el MCD.\n\nEjemplo: 18/24\nDivisores de 18: 1,2,3,6,9,18\nDivisores de 24: 1,2,3,4,6,8,12,24\nMCD = 6\n→ 18÷6=3, 24÷6=4 → 3/4",
+     visual:"ops_chain",data:{steps:["MCD(18,24)=6","18÷6=3","24÷6=4","3/4 ✅"]}},
+    {title:"¡Practiquemos!",
+     text:"Simplifica 12/16:\n→ MCD(12,16)=4\n→ 12÷4=3 y 16÷4=4\n→ Resultado: 3/4 ✅",
+     visual:"bar_equiv",data:{num:12,den:16,eq_num:3,eq_den:4}},
+  ]},
+  "Equiv.":{title:"Equivalentes y Comparación",icon:"🔁",steps:[
+    {title:"Fracciones Equivalentes",
+     text:"Representan la misma cantidad con distintos números.\n\nSe obtienen amplificando o simplificando.\n\n1/2 = 2/4 = 3/6 = 4/8",
+     visual:"bar_equiv",data:{num:1,den:2,eq_num:4,eq_den:8}},
+    {title:"Comparar con mismo denominador",
+     text:"Cuando los denominadores son IGUALES:\ngana el que tiene mayor numerador.\n\n5/8 > 3/8  (porque 5 > 3)",
+     visual:"nline",data:{vals:[{n:5,d:8,label:"5/8"},{n:3,d:8,label:"3/8"}]}},
+    {title:"Comparar con distinto denominador",
+     text:"1. Busca el MCM de los denominadores\n2. Amplifica cada fracción al MCM\n3. Compara los numeradores\n\n5/6 vs 7/9 → MCM=18\n5/6=15/18 · 7/9=14/18\n→ 5/6 es mayor",
+     visual:"nline",data:{vals:[{n:5,d:6,label:"5/6"},{n:7,d:9,label:"7/9"}]}},
+    {title:"¡Practiquemos!",
+     text:"¿Cuál es mayor: 3/4 o 2/3?\n\nMCM(4,3)=12\n3/4=9/12 y 2/3=8/12\n→ 3/4 es mayor ✅",
+     visual:"nline",data:{vals:[{n:3,d:4,label:"3/4"},{n:2,d:3,label:"2/3"}]}},
+  ]},
+  "Recta":{title:"Recta Numérica con Fracciones",icon:"📏",steps:[
+    {title:"¿Cómo se construye?",
+     text:"La recta divide cada entero en partes iguales según el denominador.\n\nDenominador 4 → cada entero se divide en 4 partes.\nCada parte vale 1/4.",
+     visual:"nline",data:{vals:[{n:1,d:4,label:"1/4"},{n:2,d:4,label:"2/4"},{n:3,d:4,label:"3/4"}]}},
+    {title:"Ubicar una fracción propia",
+     text:"Si la fracción es propia (num < den), está ENTRE 0 y 1.\n\n3/4 = 0,75 → entre 0 y 1, más cerca de 1.",
+     visual:"nline",data:{vals:[{n:3,d:4,label:"3/4=0,75"}]}},
+    {title:"Ubicar una fracción impropia",
+     text:"Si es impropia (num > den), convierte a decimal.\n\n11/4 = 11÷4 = 2,75\n→ Se ubica entre 2 y 3.",
+     visual:"nline",data:{vals:[{n:11,d:4,label:"11/4=2,75"}]}},
+    {title:"¡Practiquemos!",
+     text:"Ordena: 1/4, 3/4, 5/4, 3/2\n\nEn cuartos: 1/4, 3/4, 5/4, 6/4\n\n→ 1/4 < 3/4 < 5/4 < 3/2 ✅",
+     visual:"nline",data:{vals:[{n:1,d:4,label:"1/4"},{n:3,d:4,label:"3/4"},{n:5,d:4,label:"5/4"},{n:3,d:2,label:"3/2"}]}},
+  ]},
+};
+
+
+let G={theme:null,questions:[],worldQuestions:[],currentWorld:0,currentQ:0,globalQ:0,lives:3,score:0,worldScores:[0,0,0],worldCorrect:[0,0,0],streak:0,maxStreak:0,hintsLeft:2,hintsUsedTotal:0,wrongAnswers:[],sessionStart:null,chronoTimer:null,answered:false,paused:false,noLivesMode:false,shuffledOpts:[],newAns:0,currentLessonTopic:null,currentLessonStep:0,_pauseStart:0};
+
+let ac;
+function getAC(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();return ac;}
+function tone(f,d,t,v){t=t||'square';v=v||0.12;try{const a=getAC(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.start();o.stop(a.currentTime+d);}catch(e){}}
+function sfxCorrect(){tone(523,.08);setTimeout(()=>tone(659,.08),90);setTimeout(()=>tone(784,.18),180);}
+function sfxWrong(){tone(200,.12,'sawtooth');setTimeout(()=>tone(150,.18,'sawtooth'),130);}
+function sfxLevelUp(){[523,587,659,784,880].forEach((f,i)=>setTimeout(()=>tone(f,.13),i*75));}
+function sfxClick(){tone(800,.04,'sine',.08);}
+function sfxStreak(){[659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.1,'sine',.15),i*80));}
+function sfxHint(){tone(440,.1,'sine',.1);}
+
+function createStars(){/* replaced by initBgCanvas */}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');document.getElementById('pause-btn').style.display=id==='battle'?'block':'none';if(id==='battle')setTimeout(()=>{const c=document.getElementById('battle-canvas');if(c){c.width=c.offsetWidth||720;c.height=c.offsetHeight||110;battleW=c.width;battleH=c.height;}},50);}
+
+function startLoading(){
+  sfxClick();showScreen('loading');
+  G.theme=THEMES[Math.floor(Math.random()*THEMES.length)]; playThemeMusic(G.theme.id);
+  document.getElementById('load-theme').textContent=G.theme.name;
+  const msgs=["Eligiendo temática...","Mezclando preguntas...","Preparando lecciones...","Construyendo mundos...","¡Todo listo!"];
+  // World 0: ¿Qué es? + Tipos | World 1: Amplif. + Equiv. | World 2: Recta
+  function pickRandom(arr,n){return [...arr].sort(()=>Math.random()-.5).slice(0,n);}
+  const w0pool=QB.filter(q=>q.topic==='¿Qué es?'||q.topic==='Tipos');
+  const w1pool=QB.filter(q=>q.topic==='Amplif.'||q.topic==='Equiv.');
+  const w2pool=QB.filter(q=>q.topic==='Recta');
+  const wq0=pickRandom(w0pool,10);
+  const wq1=pickRandom(w1pool,10);
+  const wq2=pickRandom(w2pool,10);
+  G.worldQuestions=[wq0,wq1,wq2];
+  G.questions=[...wq0,...wq1,...wq2];
+  G.currentWorld=0;G.currentQ=0;G.globalQ=0;G.lives=3;G.score=0;G.worldScores=[0,0,0];G.worldCorrect=[0,0,0];G.streak=0;G.maxStreak=0;G.hintsLeft=2;G.hintsUsedTotal=0;G.wrongAnswers=[];G.noLivesMode=false;G.sessionStart=null;
+  let step=0;
+  const iv=setInterval(()=>{step++;document.getElementById('load-bar').style.width=(step/msgs.length*100)+'%';document.getElementById('load-msg').textContent=msgs[step-1]||'¡Listo!';if(step>=msgs.length){clearInterval(iv);setTimeout(showCutscene,400);}},350);
+}
+
+function showCutscene(){showScreen('cutscene');document.getElementById('cutscene-art').textContent=G.theme.player;document.getElementById('cutscene-text').textContent=G.theme.intro;}
+
+/* ── LESSON ENGINE ── */
+function goToLesson(worldIndex){
+  sfxClick();G.currentWorld=worldIndex;
+  // Each world has a fixed lesson topic
+  const worldTopics=['¿Qué es?','Amplif.','Recta'];
+  G.currentLessonTopic=worldTopics[worldIndex]||'¿Qué es?';
+  G.currentLessonStep=0;renderLesson();showScreen('lesson');
+}
+
+function renderLesson(){
+  const lesson=LESSONS[G.currentLessonTopic];
+  if(!lesson){startWorld(G.currentWorld);return;}
+  const step=lesson.steps[G.currentLessonStep];
+  const total=lesson.steps.length;
+  document.getElementById('lesson-header').textContent=lesson.icon+' MINI-LECCIÓN: '+lesson.title.toUpperCase();
+  document.getElementById('lesson-subtitle').textContent='Paso '+(G.currentLessonStep+1)+' de '+total;
+  const dotsEl=document.getElementById('lesson-dots');dotsEl.innerHTML='';
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='lesson-dot'+(i===G.currentLessonStep?' active':'');dotsEl.appendChild(d);}
+  document.getElementById('lesson-prev').style.display=G.currentLessonStep>0?'inline-block':'none';
+  document.getElementById('lesson-next').textContent=G.currentLessonStep===total-1?'¡EMPEZAR MUNDO! ►':'SIGUIENTE ▶';
+  const content=document.getElementById('lesson-content');content.innerHTML='';
+  const card=document.createElement('div');card.className='lesson-card';
+  card.innerHTML=`<div class="lesson-step-title">📌 ${step.title}</div><div class="lesson-text" style="white-space:pre-line;">${step.text}</div><div id="lesson-visual" style="margin-top:12px;"></div>`;
+  setTimeout(()=>voiceLesson(step.title+'. '+step.text),200);
+  content.appendChild(card);
+  setTimeout(()=>{const va=document.getElementById('lesson-visual');if(va)renderVisual(step.visual,step.data,va);},80);
+  // attach hover to lesson text
+  const lt=card.querySelector('.lesson-text');
+  if(lt)attachHoverRead(lt,()=>mathToSpeech(lt.textContent));
+}
+
+function lessonNext(){sfxClick();const l=LESSONS[G.currentLessonTopic];if(!l||G.currentLessonStep>=l.steps.length-1){startWorld(G.currentWorld);return;}G.currentLessonStep++;renderLesson();}
+function lessonPrev(){sfxClick();G.currentLessonStep=Math.max(0,G.currentLessonStep-1);renderLesson();}
+function skipLesson(){sfxClick();startWorld(G.currentWorld);}
+
+/* ── VISUAL RENDERERS ── */
+function renderVisual(type,data,container){
+  if(!container||!type)return;container.innerHTML='';
+  if(type==='bar_equiv')return renderBarEquiv(container,data);
+  if(type==='bar_dec')return renderBarDec(container,data);
+  if(type==='nline')return renderNline(container,data);
+  if(type==='ops_chain')return renderOpsChain(container,data.steps||[]);
+  if(type==='ops_text')return renderOpsText(container,data.text||'');
+}
+
+function renderBarEquiv(container,data){
+  const {num,den,eq_num,eq_den}=data;
+  const wrap=document.createElement('div');wrap.className='frac-visual';
+  const addBar=(n,d,color,label)=>{
+    const cap=Math.min(d,16);const capN=Math.min(n,cap);
+    const cw=Math.max(22,Math.min(40,Math.floor(260/cap)));
+    const row=document.createElement('div');row.className='frac-bar-wrap';
+    for(let i=0;i<cap;i++){const c=document.createElement('div');c.className='frac-cell '+(i<capN?'filled':'empty');if(i<capN)c.style.background=color;c.style.width=cw+'px';row.appendChild(c);}
+    const lbl=document.createElement('div');lbl.className='frac-label';lbl.textContent=label;lbl.style.color=color;
+    wrap.appendChild(row);wrap.appendChild(lbl);
+  };
+  addBar(num,den,'var(--accent)',num+'/'+den);
+  if(eq_num!==undefined)addBar(eq_num,eq_den,'var(--blue)',eq_num+'/'+eq_den+' (equivalente)');
+  container.appendChild(wrap);
+}
+
+function renderBarDec(container,data){
+  const {num,den,decimal}=data;
+  const cap=Math.min(den,12);const capN=Math.min(num,cap);
+  const cw=Math.max(22,Math.min(40,Math.floor(260/cap)));
+  const wrap=document.createElement('div');wrap.className='frac-visual';
+  const row=document.createElement('div');row.className='frac-bar-wrap';
+  for(let i=0;i<cap;i++){const c=document.createElement('div');c.className='frac-cell '+(i<capN?'filled':'empty');c.style.width=cw+'px';row.appendChild(c);}
+  const lbl=document.createElement('div');lbl.className='frac-label';
+  lbl.textContent=num+'/'+den+(decimal?' = '+decimal:'');
+  wrap.appendChild(row);wrap.appendChild(lbl);container.appendChild(wrap);
+}
+
+function renderNline(container,data){
+  const vals=data.vals||[];
+  const colors=['var(--accent)','var(--blue)','var(--green)','var(--accent2)'];
+  const wrap=document.createElement('div');wrap.style.cssText='position:relative;margin:14px 10px 44px;height:56px;min-width:220px;';
+  const track=document.createElement('div');track.className='nline-track';wrap.appendChild(track);
+  [0,0.5,1].forEach(v=>{
+    const t=document.createElement('div');t.className='nline-tick';t.style.left=(v*100)+'%';wrap.appendChild(t);
+    const tl=document.createElement('div');tl.className='nline-tick-label';tl.style.left=(v*100)+'%';tl.textContent=String(v).replace('.',',');wrap.appendChild(tl);
+  });
+  vals.forEach((v,i)=>{
+    const pct=Math.min(100,Math.round(v.n/v.d*100));
+    const dot=document.createElement('div');dot.className='nline-dot';dot.style.cssText=`left:0%;top:${4+i*20}px;background:${colors[i%colors.length]};position:absolute;width:22px;height:22px;border-radius:50%;border:3px solid #000;transform:translateX(-50%);transition:left .7s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;z-index:2;`;
+    dot.textContent=i+1;wrap.appendChild(dot);
+    const lbl=document.createElement('div');lbl.className='nline-val-label';lbl.style.cssText=`left:0%;top:${28+i*20}px;color:${colors[i%colors.length]};font-size:10px;font-weight:900;transform:translateX(-50%);transition:left .7s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;position:absolute;`;
+    lbl.textContent=v.label;wrap.appendChild(lbl);
+    setTimeout(()=>{dot.style.left=pct+'%';lbl.style.left=pct+'%';},250+i*200);
+  });
+  container.appendChild(wrap);
+}
+
+function renderOpsChain(container,steps){
+  const colors=['var(--accent)','var(--white)','var(--gray)','var(--green)'];
+  const wrap=document.createElement('div');wrap.className='ops-wrap';
+  steps.forEach((s,i)=>{
+    if(i>0){const arr=document.createElement('div');arr.className='ops-arrow';arr.textContent='↓';wrap.appendChild(arr);}
+    const row=document.createElement('div');row.className='ops-row';
+    const num=document.createElement('div');num.className='ops-num';num.textContent=s;num.style.color=colors[Math.min(i,colors.length-1)];
+    if(i===steps.length-1){num.style.background='rgba(78,204,163,.15)';num.style.border='2px solid var(--green)';}
+    row.appendChild(num);wrap.appendChild(row);
+  });
+  container.appendChild(wrap);
+}
+
+function renderOpsText(container,text){
+  const div=document.createElement('div');div.style.cssText='background:#1a2a3a;border:2px solid var(--blue);padding:12px 16px;border-radius:6px;font-size:14px;font-weight:700;color:var(--blue);white-space:pre-line;line-height:1.9;text-align:center;';div.textContent=text;container.appendChild(div);
+}
+
+/* ── VISUAL PANEL (panel explicación) ── */
+function showVisualPanel(q,title){
+  document.getElementById('vp-header').textContent='📖 '+(title||'¿CÓMO SE RESUELVE?');
+  document.getElementById('vp-question').textContent=q.q;
+  const stepsEl=document.getElementById('vp-steps');stepsEl.innerHTML='';
+  const ans=document.getElementById('vp-answer');ans.classList.remove('show');ans.textContent='';
+  const steps=buildVisualSteps(q);
+  steps.forEach((s,i)=>{
+    const div=document.createElement('div');div.className='vp-step';
+    div.innerHTML=`<div class="vp-step-num">PASO ${i+1}</div><div class="vp-step-text">${s.text}</div><div class="vp-step-visual" id="vpv${i}"></div>`;
+    stepsEl.appendChild(div);
+    setTimeout(()=>{div.classList.add('visible');const va=document.getElementById('vpv'+i);if(s.visual&&va)renderVisual(s.visual,s.vdata||{},va);},180+i*320);
+  });
+  setTimeout(()=>{ans.textContent='✅ Respuesta: '+q.opts[q.ans]+'\n\n'+q.explain;ans.classList.add('show');},180+steps.length*320+200);
+  stopVoice(); document.getElementById('visual-panel').classList.add('show');
+  document.getElementById('vp-wrap').scrollTop=0;
+}
+
+function buildVisualSteps(q){
+  const steps=[];
+  const vt=q.vtype||'ops_chain';
+  if(vt==='bar_equiv'){
+    steps.push({text:'Mira la barra: representa la fracción '+q.q.match(/\d+\/\d+/)?.[0]||'dada'+'.',visual:'bar_equiv',vdata:q.vdata});
+    steps.push({text:'Ahora observa la fracción equivalente.\nAmbas barras muestran la misma cantidad.',visual:'bar_equiv',vdata:q.vdata});
+  } else if(vt==='bar_dec'){
+    steps.push({text:'Observa la fracción '+q.q.match(/\d+\/\d+/)?.[0]||''+'.\nCada celda es una parte igual del total.',visual:'bar_dec',vdata:q.vdata});
+    if(q.topic==='Frac→Dec')steps.push({text:'Para convertir: numerador ÷ denominador.',visual:'ops_chain',vdata:{steps:[q.q.match(/\d+\/\d+/)?.[0]||'?','÷','=',q.opts[q.ans]]}});
+  } else if(vt==='nline'){
+    steps.push({text:'Ubica las fracciones en la recta numérica.\nLa más a la DERECHA es la MAYOR.',visual:'nline',vdata:q.vdata});
+    const dec=(q.vdata&&q.vdata.vals||[]).map(v=>v.label+' ≈ '+(Math.round(v.n/v.d*100)/100)).join('\n');
+    if(dec)steps.push({text:'En decimal:\n'+dec,visual:null,vdata:{}});
+  } else {
+    const vdata=q.vdata||{};
+    steps.push({text:'Sigue los pasos uno a uno:',visual:'ops_chain',vdata:vdata});
+    if(q.hint)steps.push({text:'Clave:\n'+q.hint,visual:null,vdata:{}});
+  }
+  return steps;
+}
+
+function closeVisualPanel(){document.getElementById('visual-panel').classList.remove('show');}
+function showHowItWorks(){const q=G.worldQuestions[G.currentWorld][G.currentQ];if(q)showVisualPanel(q,'¿CÓMO SE HACE?');}
+
+/* ── MAP ── */
+function showMap(){
+  sfxClick();showScreen('map');
+  document.getElementById('map-theme-badge').textContent=G.theme.name;
+  if(!G.sessionStart){G.sessionStart=Date.now();startChrono();}
+  updateMapHUD();renderMap();
+}
+
+function updateMapHUD(){
+  document.getElementById('map-hearts').textContent='❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-G.lives));
+  document.getElementById('map-score').textContent=G.score;
+  document.getElementById('map-streak').textContent='🔥'+G.streak;
+}
+
+function renderMap(){
+  const c=document.getElementById('map-container');c.innerHTML='';
+  G.theme.worlds.forEach((name,i)=>{
+    const locked=i>G.currentWorld;
+    const node=document.createElement('div');node.className='world-node pixel-box'+(locked?' locked':'');
+    node.innerHTML=`<div class="node-icon">${G.theme.worldEmojis[i]}</div><div class="node-name">${name}</div><div class="node-score">${G.worldCorrect[i]>0?'✓ '+G.worldCorrect[i]+'/10':'10 preguntas'}</div>`;
+    if(!locked)node.onclick=()=>{sfxClick();goToLesson(i);};
+    c.appendChild(node);
+    if(i<2){const a=document.createElement('div');a.className='map-connector';a.textContent='▶';c.appendChild(a);}
+  });
+}
+
+function startChrono(){
+  document.getElementById('session-chrono').style.display='block';
+  if(G.chronoTimer)clearInterval(G.chronoTimer);
+  G.chronoTimer=setInterval(()=>{
+    if(G.paused)return;
+    const e=Date.now()-G.sessionStart;const m=Math.floor(e/60000),s=Math.floor((e%60000)/1000);
+    const str=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('chrono-display').textContent=str;
+    document.getElementById('map-chrono').textContent=str;
+  },1000);
+}
+
+function togglePause(){
+  sfxClick();G.paused=!G.paused; if(G.paused)stopVoice();
+  document.getElementById('pause-overlay').classList.toggle('show',G.paused);
+  document.getElementById('pause-btn').textContent=G.paused?'► REANUDAR':'⏸ PAUSA';
+  if(G.paused)G._pauseStart=Date.now();
+  else G.sessionStart+=Date.now()-G._pauseStart;
+}
+
+/* ── BATTLE ── */
+function startWorld(worldIndex){G.currentWorld=worldIndex;G.currentQ=0;showScreen('battle');updateBattleHUD();loadQuestion();setTimeout(attachAllHovers,100);}
+
+function updateBattleHUD(){
+  document.getElementById('battle-hearts').textContent=G.noLivesMode?'👻 Sin vidas':'❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-G.lives));
+  document.getElementById('battle-score').textContent=G.score;
+  document.getElementById('battle-world-name').textContent=G.theme.worlds[G.currentWorld];
+  document.getElementById('battle-progress').textContent=(G.currentQ+1)+'/10';
+  // scene-bg handled by battle canvas
+  document.getElementById('player-sprite').textContent=G.theme.player;
+  document.getElementById('enemy-sprite').textContent=G.theme.enemies[G.currentWorld].split(' ')[0];
+  document.getElementById('enemy-name-label').textContent=G.theme.enemies[G.currentWorld];
+  document.getElementById('enemy-hp-fill').style.width=((10-G.currentQ)/10*100)+'%';
+  document.getElementById('streak-display').textContent=G.streak>=3?'🔥 Racha ×'+G.streak+'!':'';
+}
+
+function loadQuestion(){
+  if(G.currentQ>=10){worldComplete();return;}
+  const q=G.worldQuestions[G.currentWorld][G.currentQ];
+  G.answered=false;G.hintsLeft=2;
+  document.getElementById('hint-box').className='hint-box';
+  document.getElementById('hint-count').textContent=2;
+  document.getElementById('hint-btn').disabled=false;
+  document.getElementById('explanation-box').className='explanation-box';
+  document.getElementById('next-btn-wrap').style.display='none';
+  document.getElementById('q-counter').textContent='Mundo '+(G.currentWorld+1)+'/3 · P.'+(G.currentQ+1)+'/10';
+  document.getElementById('q-topic').textContent=q.topic||'';
+  document.getElementById('question-text').textContent=q.q; voiceQuestion(q.q);
+  const dialogs=["¡Resuelve esto si puedes!","¿Sabrás la respuesta?","¡Demuestra tus habilidades!","¡Muchos han fallado aquí!","Piénsalo bien antes de responder..."];
+  document.getElementById('dialog-speaker').textContent=G.theme.enemies[G.currentWorld]+' dice:';
+  const dlgTxt=dialogs[Math.floor(Math.random()*dialogs.length)];
+  document.getElementById('dialog-text').textContent=dlgTxt; voiceDialog(dlgTxt);
+  const correctOpt=q.opts[q.ans];
+  G.shuffledOpts=[...q.opts].sort(()=>Math.random()-.5);
+  G.newAns=G.shuffledOpts.indexOf(correctOpt);
+  const grid=document.getElementById('options-grid');grid.innerHTML='';
+  G.shuffledOpts.forEach((opt,i)=>{
+    const btn=document.createElement('button');btn.className='option-btn';
+    btn.innerHTML='<span style="color:var(--accent);font-family:var(--px);font-size:9px;">'+['A','B','C','D'][i]+')</span> '+opt;
+    btn.dataset.index=i;btn.onclick=()=>answerQuestion(i,btn);
+    grid.appendChild(btn);
+  });
+  // attach hover read to options
+  setTimeout(attachOptionHovers,50);
+}
+
+function useHint(){
+  if(G.hintsLeft<=0||G.answered)return;sfxHint();
+  const q=G.worldQuestions[G.currentWorld][G.currentQ];
+  G.hintsLeft--;G.hintsUsedTotal++;
+  document.getElementById('hint-count').textContent=G.hintsLeft;
+  if(G.hintsLeft<=0)document.getElementById('hint-btn').disabled=true;
+  const hbox=document.getElementById('hint-box');
+  if(G.hintsLeft===1){hbox.textContent='💡 '+q.hint;hbox.className='hint-box show';}
+  else{const btns=[...document.querySelectorAll('.option-btn:not([disabled])')];const wrong=btns.filter(b=>parseInt(b.dataset.index)!==G.newAns);wrong.sort(()=>Math.random()-.5).slice(0,2).forEach(b=>b.classList.add('eliminated'));hbox.textContent='💡 Se eliminaron 2 opciones incorrectas.';hbox.className='hint-box show';}
+}
+
+function answerQuestion(chosen,btn){
+  if(G.answered||G.paused)return;G.answered=true;
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  const q=G.worldQuestions[G.currentWorld][G.currentQ];
+  if(chosen===G.newAns){
+    sfxCorrect();btn.classList.add('correct');G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak;
+    const pts=G.hintsUsedTotal>0?150:200;G.score+=pts;G.worldScores[G.currentWorld]+=pts;G.worldCorrect[G.currentWorld]++;
+    showEffect('✨');
+    if(G.streak===3){sfxStreak();showStreakToast('🔥 ¡RACHA DE 3! +50 pts');G.score+=50;}
+    else if(G.streak===5){sfxStreak();showStreakToast('🔥🔥 ¡RACHA DE 5! +100 pts');G.score+=100;}
+    const msgs=["¡Correcto!","¡Excelente!","¡Muy bien!","¡Perfecto!","¡Genial!"];
+    const cm=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('dialog-text').textContent=cm+' (+'+pts+' pts)'; voiceResult(cm);
+    document.getElementById('enemy-hp-fill').style.width=((10-G.currentQ-1)/10*100)+'%';
+    updateBattleHUD();showExplanation(q,true);
+  }else{
+    sfxWrong();btn.classList.add('wrong');document.querySelectorAll('.option-btn')[G.newAns].classList.add('correct');
+    showEffect('💥');G.streak=0;G.wrongAnswers.push({q:q.q,correct:G.shuffledOpts[G.newAns],topic:q.topic});
+    document.getElementById('dialog-text').textContent='Incorrecto. La respuesta está marcada en verde.'; voiceResult('Incorrecto. La respuesta correcta era: '+mathToSpeech(q.opts[q.ans]));
+    if(!G.noLivesMode)loseLife();
+    showExplanation(q,false);
+    setTimeout(()=>{if(G.answered)showVisualPanel(q,'¿CÓMO SE RESUELVE?');},900);
+  }
+}
+
+function showExplanation(q,correct){
+  const box=document.getElementById('explanation-box');
+  box.style.background=correct?'#0d1f0d':'#1f0d0d';
+  box.style.borderColor=correct?'var(--green)':'var(--accent2)';
+  box.style.color=correct?'var(--green)':'#ff8888';
+  box.textContent=(correct?'✅ ':'❌ ')+q.explain;
+  box.className='explanation-box show';
+  document.getElementById('next-btn-wrap').style.display='flex';
+}
+
+function proceedNext(){if(G.lives<=0&&!G.noLivesMode){gameOver();return;}G.currentQ++;G.globalQ++;updateBattleHUD();loadQuestion();}
+
+function loseLife(){G.lives=Math.max(0,G.lives-1);document.getElementById('battle-hearts').textContent='❤️'.repeat(G.lives)+'🖤'.repeat(3-G.lives);updateMapHUD();}
+
+function worldComplete(){
+  sfxLevelUp();
+  const correct=G.worldCorrect[G.currentWorld];
+  const nota=calcNota(correct/10);
+  const stars=correct>=9?'⭐⭐⭐':correct>=7?'⭐⭐':correct>=5?'⭐':'';
+  const color=nota>=6?'var(--green)':nota>=4?'var(--accent)':'var(--accent2)';
+  document.getElementById('results-title').textContent='🏆 '+G.theme.worlds[G.currentWorld]+' ¡Completado!';
+  document.getElementById('results-stars').textContent=stars;
+  document.getElementById('results-grade').textContent=nota.toFixed(1);
+  document.getElementById('results-grade').style.color=color;
+  document.getElementById('results-stats').innerHTML='✅ Correctas: '+correct+'/10<br>⭐ Puntos: '+G.worldScores[G.currentWorld]+'<br>❤️ Vidas: '+G.lives+'<br>🔥 Mejor racha: '+G.maxStreak;
+  const msgs={10:"¡PERFECTO! Sin ningún error. 🏆",9:"¡Casi perfecto! Solo un error. 🌟",8:"¡Muy bien! 💪",7:"¡Bien! Puedes mejorar.",6:"Pasaste. Repasa lo que falló.",5:"Justo en el límite. ¡Practica más!"};
+  document.getElementById('results-msg').textContent=msgs[correct]||'¡Sigue practicando!';
+  const isLast=G.currentWorld>=2;
+  document.getElementById('results-continue-btn').textContent=isLast?'► VER RESULTADO FINAL':'► SIGUIENTE MUNDO';
+  showScreen('results');
+}
+
+function continueAfterWorld(){sfxClick();if(G.currentWorld>=2){showFinalResults();return;}G.currentWorld++;G.hintsLeft=2;showMap();}
+
+function gameOver(){sfxWrong();showScreen('gameover');const correct=G.worldCorrect.reduce((a,b)=>a+b,0);document.getElementById('gameover-stats').innerHTML='Correctas: '+correct+'/'+G.globalQ+'<br>Puntuación: '+G.score+' pts<br>Mundo '+(G.currentWorld+1)+'/3';}
+
+function continueWithoutLives(){sfxClick();G.noLivesMode=true;showScreen('battle');updateBattleHUD();if(G.answered)proceedNext();else loadQuestion();}
+
+function showFinalResults(){
+  clearInterval(G.chronoTimer);document.getElementById('session-chrono').style.display='none';
+  const totalCorrect=G.worldCorrect.reduce((a,b)=>a+b,0);
+  const nota=calcNota(totalCorrect/30);
+  const color=nota>=6?'var(--green)':nota>=4?'var(--accent)':'var(--accent2)';
+  const stars=nota>=6?'⭐⭐⭐':nota>=4?'⭐⭐':'⭐';
+  const elapsed=Date.now()-G.sessionStart;
+  const min=Math.floor(elapsed/60000),sec=Math.floor((elapsed%60000)/1000);
+  document.getElementById('victory-title').textContent='🏆 '+G.theme.name+' ¡COMPLETADO!';
+  document.getElementById('victory-stars').textContent=stars;
+  document.getElementById('victory-grade').textContent=nota.toFixed(1);
+  document.getElementById('victory-grade').style.color=color;
+  document.getElementById('victory-stats').innerHTML='✅ Correctas: '+totalCorrect+'/30<br>⭐ Puntaje: '+G.score+' pts<br>⏱ Tiempo: '+min+'m '+sec+'s<br>🔥 Mejor racha: '+G.maxStreak+'<br>💡 Pistas usadas: '+G.hintsUsedTotal;
+  document.getElementById('victory-msg').textContent=nota>=6?G.theme.victory:nota>=4?'¡Buen intento! Repasa los temas donde fallaste.':'¡Sigue practicando! Cada partida cambia las preguntas.';
+  sfxLevelUp();showScreen('victory');
+}
+
+function calcNota(pct){if(pct>=1)return 7.0;if(pct>=0.6)return 4.0+(pct-0.6)/0.4*3.0;return 1.0+pct/0.6*3.0;}
+
+function showEffect(emoji){const el=document.getElementById('effect-overlay');el.textContent=emoji;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),700);}
+function showStreakToast(msg){const el=document.getElementById('streak-toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+
+function goToTitle(){sfxClick();clearInterval(G.chronoTimer);document.getElementById('session-chrono').style.display='none';document.getElementById('pause-btn').style.display='none';document.getElementById('pause-overlay').classList.remove('show');document.getElementById('visual-panel').classList.remove('show');G.paused=false;G.sessionStart=null;showScreen('title');}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(document.getElementById('visual-panel').classList.contains('show')){closeVisualPanel();return;}if(document.getElementById('screen-battle').classList.contains('active'))togglePause();return;}
+  if(G.paused)return;
+  if(document.getElementById('screen-battle').classList.contains('active')){
+    const map={'1':0,'2':1,'3':2,'4':3};
+    if(map[e.key]!==undefined){const btns=[...document.querySelectorAll('.option-btn:not([disabled]):not(.eliminated)')];if(btns[map[e.key]])btns[map[e.key]].click();}
+    if(e.key==='h'||e.key==='H')useHint();
+    if((e.key==='Enter'||e.key===' ')&&document.getElementById('next-btn-wrap').style.display!=='none')proceedNext();
+  }
+  if(document.getElementById('screen-lesson').classList.contains('active')){if(e.key==='ArrowRight')lessonNext();if(e.key==='ArrowLeft')lessonPrev();}
+});
+
+
+/* ═══════════════════════════════════════════════════
+   AUDIO ENGINE v2 — 8-bit Music + Natural Voice + Hover Read
+   ═══════════════════════════════════════════════════ */
+let _ac = null;
+function AC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+
+/* ── VOLUMES ── */
+let musicVol=0.55, voiceVol=1.0, musicMuted=false, voiceMuted=false;
+let masterMusicGain=null, currentMusicStop=null, currentThemeId=null;
+function setMusicVol(v){musicVol=v/100;if(masterMusicGain)masterMusicGain.gain.setTargetAtTime(musicMuted?0:musicVol,AC().currentTime,.05);}
+function setVoiceVol(v){voiceVol=v/100;}
+function toggleMusic(){musicMuted=!musicMuted;if(masterMusicGain)masterMusicGain.gain.setTargetAtTime(musicMuted?0:musicVol,AC().currentTime,.15);document.getElementById('btn-music').textContent=musicMuted?'▶ MÚSICA':'⏸ MÚSICA';}
+function toggleVoice(){voiceMuted=!voiceMuted;if(voiceMuted)stopVoice();document.getElementById('btn-voice').textContent=voiceMuted?'🔇 VOZ':'🔊 VOZ';}
+function toggleAudioPanel(){document.getElementById('audio-panel-wrap').classList.toggle('open');}
+
+/* ── VOICE (natural) ── */
+let currentUtterance=null;
+let _voices=[];
+function loadVoices(){ _voices=window.speechSynthesis.getVoices(); }
+window.speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,600);
+
+function getBestVoice(){
+  if(_voices.length===0)_voices=window.speechSynthesis.getVoices();
+  const priority=[
+    v=>v.name.includes('Paulina'),
+    v=>v.name.includes('Monica')||v.name.includes('Mónica'),
+    v=>v.name.includes('Luciana'),
+    v=>v.name.toLowerCase().includes('google')&&v.lang.startsWith('es'),
+    v=>v.name.toLowerCase().includes('microsoft')&&v.lang.startsWith('es'),
+    v=>v.lang==='es-CL',v=>v.lang==='es-MX',v=>v.lang==='es-ES',v=>v.lang.startsWith('es'),
+  ];
+  for(const t of priority){const v=_voices.find(t);if(v)return v;}
+  return null;
+}
+
+/* ── TEXT CLEANER: convierte símbolos matemáticos a palabras ── */
+function mathToSpeech(text){
+  if(!text)return '';
+  return text
+    // fracciones  3/4 → "3 cuartos", 1/2 → "un medio", etc.
+    .replace(/\b1\/2\b/g,'un medio')
+    .replace(/\b1\/3\b/g,'un tercio')
+    .replace(/\b2\/3\b/g,'dos tercios')
+    .replace(/\b1\/4\b/g,'un cuarto')
+    .replace(/\b3\/4\b/g,'tres cuartos')
+    .replace(/\b1\/5\b/g,'un quinto')
+    .replace(/\b2\/5\b/g,'dos quintos')
+    .replace(/\b3\/5\b/g,'tres quintos')
+    .replace(/\b4\/5\b/g,'cuatro quintos')
+    .replace(/\b1\/6\b/g,'un sexto')
+    .replace(/\b5\/6\b/g,'cinco sextos')
+    .replace(/\b1\/8\b/g,'un octavo')
+    .replace(/\b3\/8\b/g,'tres octavos')
+    .replace(/\b5\/8\b/g,'cinco octavos')
+    .replace(/\b7\/8\b/g,'siete octavos')
+    .replace(/\b1\/10\b/g,'un décimo')
+    .replace(/\b(\d+)\/(\d+)\b/g,(_,n,d)=>n+' sobre '+d)
+    // operadores
+    .replace(/×/g,' por ')
+    .replace(/÷/g,' dividido ')
+    .replace(/\+/g,' más ')
+    .replace(/−/g,' menos ')
+    .replace(/-/g,' menos ')
+    .replace(/=/g,' igual a ')
+    .replace(/</g,' es menor que ')
+    .replace(/>/g,' es mayor que ')
+    .replace(/≤/g,' menor o igual a ')
+    .replace(/≥/g,' mayor o igual a ')
+    .replace(/≈/g,' aproximadamente ')
+    // HTML tags
+    .replace(/<[^>]+>/g,' ')
+    // emojis
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu,' ')
+    .replace(/[🎉⭐💪🏆🌟✅❌💡📖⚖️🔄➕🧩🟰📏🍕]/g,' ')
+    // números mixtos  "3 y 2/5" ya está bien
+    // limpiar espacios
+    .replace(/\s+/g,' ').trim();
+}
+
+function speak(text,opts){
+  if(voiceMuted||!text||!text.trim())return;
+  stopVoice();
+  const clean=mathToSpeech(text);
+  if(!clean)return;
+  const u=new SpeechSynthesisUtterance(clean);
+  const voice=getBestVoice();
+  if(voice)u.voice=voice;
+  u.lang='es-CL';
+  u.rate=opts&&opts.rate!=null?opts.rate:0.92;
+  u.pitch=opts&&opts.pitch!=null?opts.pitch:1.0;
+  u.volume=voiceVol;
+  currentUtterance=u;
+  setTimeout(()=>window.speechSynthesis.speak(u),60);
+}
+function stopVoice(){window.speechSynthesis.cancel();currentUtterance=null;}
+
+/* ── HOVER READ ── */
+let hoverTimer=null;
+function attachHoverRead(el,getText){
+  if(!el||el._hoverAttached)return;
+  el._hoverAttached=true;
+  el.addEventListener('mouseenter',()=>{
+    clearTimeout(hoverTimer);
+    hoverTimer=setTimeout(()=>{
+      const t=typeof getText==='function'?getText():getText;
+      if(t)speak(t,{rate:0.93,pitch:1.0});
+    },300);
+  });
+  el.addEventListener('mouseleave',()=>{
+    clearTimeout(hoverTimer);
+    stopVoice();
+  });
+}
+
+/* ── ATTACH HOVERS to all readable elements ── */
+function attachAllHovers(){
+  // Pregunta
+  const qt=document.getElementById('question-text');
+  if(qt)attachHoverRead(qt,()=>mathToSpeech(qt.textContent));
+
+  // Opciones de respuesta
+  document.querySelectorAll('.option-btn').forEach((btn,i)=>{
+    // extraer solo el texto de la opción, sin la letra A/B/C/D
+    attachHoverRead(btn,()=>{
+      const raw=btn.textContent||'';
+      // remove "A) " prefix
+      const clean=raw.replace(/^[A-D]\)\s*/,'').trim();
+      return mathToSpeech(['Opción A: ','Opción B: ','Opción C: ','Opción D: '][i]+clean);
+    });
+  });
+
+  // Pista
+  const hb=document.getElementById('hint-box');
+  if(hb)attachHoverRead(hb,()=>mathToSpeech(hb.textContent));
+
+  // Explicación
+  const eb=document.getElementById('explanation-box');
+  if(eb)attachHoverRead(eb,()=>mathToSpeech(eb.textContent));
+
+  // Diálogo del enemigo
+  const dt=document.getElementById('dialog-text');
+  if(dt)attachHoverRead(dt,()=>mathToSpeech(dt.textContent));
+}
+
+/* attach options after each question loads */
+function attachOptionHovers(){
+  // re-attach to fresh buttons (new elements each question)
+  document.querySelectorAll('.option-btn').forEach((btn,i)=>{
+    btn._hoverAttached=false; // force re-attach on new buttons
+    attachHoverRead(btn,()=>{
+      const raw=btn.textContent||'';
+      const clean=raw.replace(/^[A-D]\)\s*/,'').trim();
+      return mathToSpeech(['Opción A: ','Opción B: ','Opción C: ','Opción D: '][i]+clean);
+    });
+  });
+}
+
+
+/* ── 8-BIT MUSIC ENGINE ── */
+/* 
+  True 8-bit: square waves (duty ~50%), pulse waves, triangle bass,
+  noise percussion. No continuous loops — we use Web Audio scheduling
+  for sample-accurate timing like real chip trackers.
+*/
+
+function makeChipOsc(ctx,dest,type,freq,vol,startT,durT,detune){
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.connect(g);g.connect(dest);
+  o.type=type||'square';
+  o.frequency.value=freq;
+  if(detune)o.detune.value=detune;
+  // NES-style envelope: instant attack, slight decay
+  g.gain.setValueAtTime(0,startT);
+  g.gain.linearRampToValueAtTime(vol,startT+0.005);
+  g.gain.setValueAtTime(vol,startT+durT*0.7);
+  g.gain.linearRampToValueAtTime(0,startT+durT);
+  o.start(startT);
+  o.stop(startT+durT+0.01);
+}
+
+function makeNoise(ctx,dest,vol,startT,durT){
+  try{
+    const bufLen=ctx.sampleRate*0.05;
+    const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1);
+    const src=ctx.createBufferSource();src.buffer=buf;
+    const g=ctx.createGain();
+    // high-pass filter for hi-hat sound
+    const hpf=ctx.createBiquadFilter();hpf.type='highpass';hpf.frequency.value=4000;
+    src.connect(hpf);hpf.connect(g);g.connect(dest);
+    g.gain.setValueAtTime(vol,startT);
+    g.gain.linearRampToValueAtTime(0,startT+durT);
+    src.start(startT);src.stop(startT+durT+0.01);
+  }catch(e){}
+}
+
+function nf(note,oct){
+  const n={'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11};
+  return 27.5*Math.pow(2,(n[note]+(oct+1)*12)/12);
+}
+
+function stopMusic(fade){
+  if(!currentMusicStop)return;
+  if(fade&&masterMusicGain){
+    masterMusicGain.gain.setTargetAtTime(0,AC().currentTime,.35);
+    setTimeout(()=>{try{currentMusicStop();}catch(e){}currentMusicStop=null;currentThemeId=null;},700);
+  }else{
+    try{currentMusicStop();}catch(e){}
+    currentMusicStop=null;currentThemeId=null;
+  }
+}
+
+function playThemeMusic(themeId){
+  if(currentThemeId===themeId)return;
+  stopMusic(true);
+  currentThemeId=themeId;
+  setTimeout(()=>startThemeMusic(themeId),700);
+}
+
+function startThemeMusic(themeId){
+  const ctx=AC();
+  masterMusicGain=ctx.createGain();
+  masterMusicGain.gain.setValueAtTime(0,ctx.currentTime);
+  masterMusicGain.gain.setTargetAtTime(musicMuted?0:musicVol,ctx.currentTime,.5);
+  masterMusicGain.connect(ctx.destination);
+  const map={vaquero:chip_vaquero,espacial:chip_espacial,piratas:chip_piratas,medieval:chip_medieval,ninja:chip_ninja,dinos:chip_dinos,mapuche:chip_mapuche,futuro:chip_futuro};
+  const fn=map[themeId]||chip_espacial;
+  currentMusicStop=fn(ctx,masterMusicGain);
+}
+
+/* ── CHIP COMPOSER HELPER ── */
+/* Each song is defined as arrays of [note,octave,duration_in_16ths].
+   BPM drives the 16th-note duration. We schedule one bar at a time
+   and use setInterval to keep looping. */
+function chipSong(ctx,dest,bpm,tracks){
+  const t16=60/bpm/4; // duration of one 16th note
+  let stopped=false;
+  let nextBar=ctx.currentTime+0.05;
+
+  function scheduleBar(){
+    if(stopped)return;
+    tracks.forEach(({notes,type,vol,octShift,detune,noise})=>{
+      let t=nextBar;
+      notes.forEach(([n,o,d])=>{
+        const dur=d*t16;
+        if(noise){
+          makeNoise(ctx,dest,vol||0.04,t,dur*0.4);
+        } else if(n!=='R'){
+          makeChipOsc(ctx,dest,type||'square',nf(n,(o||0)+(octShift||0)),vol||0.08,t,dur*0.85,detune||0);
+        }
+        t+=dur;
+      });
+    });
+    const barLen=tracks[0].notes.reduce((a,[,,d])=>a+d,0)*t16;
+    nextBar+=barLen;
+  }
+
+  scheduleBar();
+  const totalMs=tracks[0].notes.reduce((a,[,,d])=>a+d,0)*t16*1000;
+  const iv=setInterval(()=>{if(!stopped)scheduleBar();},totalMs-50);
+  return ()=>{stopped=true;clearInterval(iv);};
+}
+
+/* ── 8 CHIP SONGS ── */
+
+// VAQUERO 🤠 — Country feel, major key, bouncy
+function chip_vaquero(ctx,dest){
+  return chipSong(ctx,dest,120,[
+    {type:'square',vol:.09,octShift:0,notes:[
+      ['G',4,2],['G',4,1],['A',4,1],['B',4,2],['D',5,2],
+      ['B',4,2],['A',4,2],['G',4,4],
+      ['E',4,2],['E',4,1],['F',4,1],['G',4,2],['A',4,2],
+      ['G',4,2],['D',4,2],['G',4,4],
+    ]},
+    {type:'triangle',vol:.07,octShift:-2,notes:[
+      ['G',4,4],['D',4,4],['G',4,4],['D',4,4],
+      ['C',4,4],['G',3,4],['D',4,4],['G',3,4],
+    ]},
+    {noise:true,vol:.035,notes:[
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+    ]},
+  ]);
+}
+
+// ESPACIAL 🚀 — Minor/mysterious, slow arp
+function chip_espacial(ctx,dest){
+  return chipSong(ctx,dest,90,[
+    {type:'square',vol:.08,notes:[
+      ['C',5,4],['R',0,2],['E',5,2],['G',5,4],['R',0,2],['A',5,2],
+      ['G',5,4],['R',0,2],['F',5,2],['E',5,4],['R',0,4],
+      ['F',5,4],['R',0,2],['D',5,2],['C',5,8],
+    ]},
+    {type:'triangle',vol:.06,octShift:-2,notes:[
+      ['C',4,4],['G',4,4],['F',4,4],['G',4,4],
+      ['C',4,4],['A',3,4],['F',3,4],['G',3,4],
+    ]},
+    {type:'square',vol:.04,detune:7,notes:[
+      ['C',4,2],['E',4,2],['G',4,2],['C',5,2],
+      ['G',4,2],['E',4,2],['F',4,2],['A',4,2],
+      ['E',4,2],['G',4,2],['C',5,2],['E',5,2],
+      ['D',5,2],['B',4,2],['G',4,2],['F',4,2],
+    ]},
+  ]);
+}
+
+// PIRATAS 🏴‍☠️ — Dorian minor, swashbuckling rhythm
+function chip_piratas(ctx,dest){
+  return chipSong(ctx,dest,130,[
+    {type:'square',vol:.09,notes:[
+      ['A',4,2],['C',5,2],['E',5,3],['R',0,1],['A',5,2],['G',5,2],
+      ['F',5,2],['E',5,2],['D',5,3],['R',0,1],['E',5,2],['F',5,2],
+      ['G',5,2],['A',5,3],['R',0,1],['G',5,2],['F',5,2],
+      ['E',5,4],['R',0,4],
+    ]},
+    {type:'triangle',vol:.08,octShift:-2,notes:[
+      ['A',4,4],['E',4,4],['F',4,4],['E',4,4],
+      ['D',4,4],['A',3,4],['E',4,4],['A',3,4],
+    ]},
+    {noise:true,vol:.05,notes:[
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+    ]},
+  ]);
+}
+
+// MEDIEVAL ⚔️ — Dorian/modal, epic march
+function chip_medieval(ctx,dest){
+  return chipSong(ctx,dest,100,[
+    {type:'square',vol:.08,notes:[
+      ['D',4,2],['F',4,2],['A',4,4],['C',5,4],['A',4,2],['F',4,2],
+      ['G',4,2],['A',4,2],['B',4,4],['A',4,6],['R',0,2],
+      ['D',4,2],['E',4,2],['F',4,4],['G',4,4],['F',4,2],['E',4,2],
+      ['D',4,12],['R',0,4],
+    ]},
+    {type:'triangle',vol:.07,octShift:-2,notes:[
+      ['D',4,8],['G',4,8],
+      ['C',4,8],['D',4,8],
+    ]},
+    {noise:true,vol:.06,notes:[
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+    ]},
+  ]);
+}
+
+// NINJA 🥷 — East-Asian pentatonic, staccato
+function chip_ninja(ctx,dest){
+  return chipSong(ctx,dest,110,[
+    {type:'square',vol:.08,notes:[
+      ['D',5,1],['R',0,1],['F',5,1],['R',0,1],['G',5,2],['A',5,2],['R',0,2],
+      ['G',5,1],['R',0,1],['F',5,1],['R',0,1],['D',5,2],['C',5,4],
+      ['C',5,1],['R',0,1],['D',5,1],['R',0,1],['F',5,2],['G',5,2],['R',0,2],
+      ['F',5,1],['R',0,1],['D',5,1],['R',0,1],['C',5,4],['R',0,2],['C',5,2],
+    ]},
+    {type:'triangle',vol:.06,octShift:-2,notes:[
+      ['D',4,4],['A',4,4],['G',4,4],['D',4,4],
+      ['C',4,4],['A',3,4],['D',4,4],['A',3,4],
+    ]},
+    {noise:true,vol:.04,notes:[
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+      ['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],['R',0,2],
+    ]},
+  ]);
+}
+
+// DINOSAURIOS 🦕 — Major/adventurous, upbeat
+function chip_dinos(ctx,dest){
+  return chipSong(ctx,dest,115,[
+    {type:'square',vol:.09,notes:[
+      ['G',4,2],['A',4,2],['B',4,2],['D',5,2],['B',4,2],['A',4,2],['G',4,4],
+      ['C',5,2],['B',4,2],['A',4,2],['G',4,2],['F',4,2],['G',4,2],['A',4,4],
+      ['G',4,2],['A',4,2],['B',4,2],['D',5,4],['C',5,2],['B',4,2],['A',4,4],
+      ['G',4,12],['R',0,4],
+    ]},
+    {type:'triangle',vol:.07,octShift:-2,notes:[
+      ['G',4,4],['C',4,4],['D',4,4],['G',3,4],
+      ['F',3,4],['C',4,4],['D',4,4],['G',3,4],
+    ]},
+    {noise:true,vol:.05,notes:[
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+      ['R',0,4],['R',0,2],['R',0,2],['R',0,4],['R',0,2],['R',0,2],
+    ]},
+  ]);
+}
+
+// MAPUCHE 🌄 — Andean pentatonic minor, flute-like triangle
+function chip_mapuche(ctx,dest){
+  return chipSong(ctx,dest,85,[
+    {type:'triangle',vol:.10,notes:[
+      ['A',4,3],['R',0,1],['C',5,2],['D',5,3],['R',0,1],['E',5,2],
+      ['D',5,3],['R',0,1],['C',5,2],['A',4,6],['R',0,2],
+      ['G',4,3],['R',0,1],['A',4,2],['C',5,3],['R',0,1],['D',5,2],
+      ['C',5,3],['R',0,1],['A',4,2],['G',4,8],
+    ]},
+    {type:'triangle',vol:.06,octShift:-2,notes:[
+      ['A',4,8],['E',4,8],
+      ['D',4,8],['A',3,8],
+    ]},
+    {type:'square',vol:.04,octShift:-1,notes:[
+      ['A',3,2],['R',0,2],['E',3,2],['R',0,2],['A',3,2],['R',0,2],['E',3,2],['R',0,2],
+      ['D',3,2],['R',0,2],['A',2,2],['R',0,2],['E',3,2],['R',0,2],['A',2,2],['R',0,2],
+    ]},
+  ]);
+}
+
+// FUTURO 🤖 — Synthwave, driving pulse
+function chip_futuro(ctx,dest){
+  return chipSong(ctx,dest,128,[
+    {type:'square',vol:.08,notes:[
+      ['C',5,2],['E',5,2],['G',5,2],['A',5,2],['G',5,2],['F',5,2],['E',5,4],
+      ['D',5,2],['F',5,2],['A',5,2],['B',5,2],['A',5,2],['G',5,2],['F',5,4],
+      ['E',5,2],['G',5,2],['B',5,2],['C',6,2],['B',5,2],['A',5,2],['G',5,4],
+      ['F',5,2],['A',5,2],['C',6,4],['B',5,4],['G',5,4],
+    ]},
+    {type:'square',vol:.06,octShift:-2,notes:[
+      ['C',4,4],['G',4,4],['F',4,4],['G',4,4],
+      ['D',4,4],['A',4,4],['F',4,4],['G',4,4],
+    ]},
+    {noise:true,vol:.06,notes:[
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+      ['R',0,4],['R',0,4],['R',0,4],['R',0,4],
+    ]},
+  ]);
+}
+
+/* ── SFX ── */
+function tone(f,d,t,v){t=t||'square';v=v||0.12;try{const a=AC(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.start();o.stop(a.currentTime+d);}catch(e){}}
+function sfxCorrect(){tone(523,.06,'square',.1);setTimeout(()=>tone(659,.06,'square',.1),80);setTimeout(()=>tone(784,.14,'square',.12),160);}
+function sfxWrong(){tone(196,.08,'square',.12);setTimeout(()=>tone(147,.14,'square',.1),100);}
+function sfxLevelUp(){[523,587,659,784,880,1047].forEach((f,i)=>setTimeout(()=>tone(f,.1,'square',.1),i*65));}
+function sfxClick(){tone(880,.03,'square',.07);}
+function sfxStreak(){[659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.08,'square',.12),i*70));}
+function sfxHint(){tone(440,.08,'square',.08);}
+
+/* ── VOICE HOOKS ── */
+function voiceQuestion(q){if(voiceMuted)return;stopVoice();setTimeout(()=>speak(mathToSpeech(q),{rate:0.91,pitch:1.0}),350);}
+function voiceDialog(text){if(!voiceMuted)speak(mathToSpeech(text),{rate:1.0,pitch:1.1});}
+function voiceResult(text){if(!voiceMuted)speak(mathToSpeech(text),{rate:0.95,pitch:1.05});}
+function voiceLesson(text){if(!voiceMuted)speak(mathToSpeech(text),{rate:0.88,pitch:1.0});}
+
+/* ── ATTACH HOVER READ to static elements ── */
+function setupHoverReads(){
+  // question text
+  const qt=document.getElementById('question-text');
+  if(qt)attachHoverRead(qt,()=>qt.textContent);
+  // hint box
+  const hb=document.getElementById('hint-box');
+  if(hb)attachHoverRead(hb,()=>hb.textContent);
+  // explanation box
+  const eb=document.getElementById('explanation-box');
+  if(eb)attachHoverRead(eb,()=>eb.textContent);
+}
+
+/* ── AUDIO PANEL UI ── */
+window.addEventListener('load',()=>{
+  document.getElementById('audio-controls').style.display='flex';
+  loadVoices();
+  attachAllHovers();
+});
+
+
+
+initBgCanvas();
+setTimeout(initBattleCanvas,100);
+</script>
+
+<!-- AUDIO CONTROLS -->
+<div id="audio-controls">
+  <button class="audio-toggle" onclick="toggleAudioPanel()" id="audio-toggle-btn">🎵 AUDIO</button>
+  <div id="audio-panel-wrap">
+    <div class="audio-panel">
+      <div class="audio-row">🎵 MÚSICA
+        <input type="range" id="vol-music" min="0" max="100" value="60" oninput="setMusicVol(this.value)">
+      </div>
+      <div class="audio-row">🔊 VOZ
+        <input type="range" id="vol-voice" min="0" max="100" value="90" oninput="setVoiceVol(this.value)">
+      </div>
+      <div class="audio-row" style="justify-content:space-between;">
+        <button class="audio-toggle" style="padding:5px 10px;font-size:8px;" onclick="toggleMusic()" id="btn-music">⏸ MÚSICA</button>
+        <button class="audio-toggle" style="padding:5px 10px;font-size:8px;" onclick="toggleVoice()" id="btn-voice">🔇 VOZ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
