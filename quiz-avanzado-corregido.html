@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Avanzado - Razones, Porcentajes y Álgebra 6º Básico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .quiz-question {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #f5576c;
+            display: none;
+        }
+
+        .quiz-question.active {
+            display: block;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quiz-question h3 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.6;
+        }
+
+        .quiz-number {
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            font-size: 1.05em;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option.selected {
+            background: #e8f4ff;
+            border-color: #667eea;
+            font-weight: bold;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #f5576c;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.05em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.5s ease-out;
+        }
+
+        .results-container.show {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .results-emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .results-score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .results-percentage {
+            font-size: 2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .results-message {
+            font-size: 1.3em;
+            margin-top: 20px;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .results-details {
+            background: white;
+            color: #2d3436;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: left;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .result-item.incorrect {
+            background: #f8d7da;
+            border-color: #f5576c;
+        }
+
+        .result-item-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .result-item-answer {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .question-counter {
+            color: white;
+            font-size: 1.1em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .difficulty-badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .sound-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .sound-btn.off {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Quiz Avanzado</h1>
+            <p>Razones, Porcentajes y Álgebra</p>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Pregunta 1 de 20</div>
+            </div>
+            <div class="question-counter" id="questionCounter">Preguntas respondidas: 0/20</div>
+            <div class="difficulty-badge">🔥 Nivel Avanzado</div>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div id="quizContent"></div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-primary" id="prevBtn" onclick="preguntaAnterior()">← Anterior</button>
+                <button class="btn btn-secondary" id="nextBtn" onclick="siguientePregunta()">Siguiente →</button>
+            </div>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <div class="results-emoji" id="resultsEmoji"></div>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-percentage" id="resultsPercentage"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            
+            <div class="results-details">
+                <h3 style="color: #2d3436; margin-bottom: 20px;">📊 Análisis de Respuestas</h3>
+                <div id="resultsList"></div>
+            </div>
+
+            <button class="btn-restart" onclick="reiniciarQuiz()">🔄 Intentar de Nuevo</button>
+        </div>
+    </div>
+
+    <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+
+    <script>
+        // Función para mezclar array
+        function barajar(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Función para crear pregunta con opciones barajeadas
+        function crearPregunta(numero, pregunta, opciones, respuestaOriginal, explicacion) {
+            const opcionesConIndice = opciones.map((opcion, idx) => ({
+                texto: opcion,
+                esCorrecta: idx === respuestaOriginal
+            }));
+            
+            const opcionesBarajeadas = barajar(opcionesConIndice);
+            const respuestaBarajeada = opcionesBarajeadas.findIndex(op => op.esCorrecta);
+            
+            return {
+                numero,
+                pregunta,
+                opciones: opcionesBarajeadas.map(op => op.texto),
+                respuesta: respuestaBarajeada,
+                explicacion
+            };
+        }
+
+        const preguntasOriginales = [
+            {
+                numero: 1,
+                pregunta: "Una tienda tiene una razón de 5 televisores por cada 3 computadoras. Si hay 25 televisores, ¿cuántas computadoras hay?",
+                opciones: ["15", "18", "20", "12"],
+                respuesta: 0,
+                explicacion: "Razones equivalentes: 5:3 = 25:x → x = (25 × 3) ÷ 5 = 15"
+            },
+            {
+                numero: 2,
+                pregunta: "¿Son equivalentes las razones 6:9 y 8:12?",
+                opciones: ["Sí, ambas se simplifican a 2:3", "No, una es 2:3 y otra es 2:3 también", "No, 6:9 es 2:3 pero 8:12 es 3:4", "Sí, pero en orden inverso"],
+                respuesta: 0,
+                explicacion: "6:9 = 2:3 (dividir por 3) y 8:12 = 2:3 (dividir por 4). Ambas son iguales."
+            },
+            {
+                numero: 3,
+                pregunta: "Si en un curso de 40 estudiantes el 45% obtuvo una buena calificación, ¿cuántos estudiantes fueron?",
+                opciones: ["18", "16", "22", "20"],
+                respuesta: 0,
+                explicacion: "(40 × 45) ÷ 100 = 1800 ÷ 100 = 18 estudiantes"
+            },
+            {
+                numero: 4,
+                pregunta: "Un juego cuesta $8000. Tiene un descuento del 25%. ¿Cuál es el precio final?",
+                opciones: ["$6000", "$2000", "$7000", "$5000"],
+                respuesta: 0,
+                explicacion: "25% de 8000 = 2000. Precio final: 8000 - 2000 = $6000"
+            },
+            {
+                numero: 5,
+                pregunta: "¿Qué porcentaje es 32 de 80?",
+                opciones: ["40%", "35%", "45%", "38%"],
+                respuesta: 0,
+                explicacion: "(32 ÷ 80) × 100 = 0.4 × 100 = 40%"
+            },
+            {
+                numero: 6,
+                pregunta: "Si 60% de un número es 240, ¿cuál es el número?",
+                opciones: ["400", "360", "300", "480"],
+                respuesta: 0,
+                explicacion: "Total = (240 × 100) ÷ 60 = 24000 ÷ 60 = 400"
+            },
+            {
+                numero: 7,
+                pregunta: "Un artículo cuesta $2000 con descuento del 20%. ¿Cuánto costaba sin descuento?",
+                opciones: ["$2500", "$2400", "$2250", "$2600"],
+                respuesta: 0,
+                explicacion: "Si el precio con descuento es el 80% del original: 2000 ÷ 0.8 = $2500"
+            },
+            {
+                numero: 8,
+                pregunta: "La expresión 'el doble de un número menos 7' es:",
+                opciones: ["2x - 7", "2(x - 7)", "2x + 7", "x/2 - 7"],
+                respuesta: 0,
+                explicacion: "Doble de x = 2x. Menos 7 = 2x - 7"
+            },
+            {
+                numero: 9,
+                pregunta: "Si x = 5, ¿cuál es el valor de 3(x + 2) - 4?",
+                opciones: ["17", "15", "19", "21"],
+                respuesta: 0,
+                explicacion: "3(5 + 2) - 4 = 3(7) - 4 = 21 - 4 = 17"
+            },
+            {
+                numero: 10,
+                pregunta: "Una razón es 7:5. ¿Cuál es la razón inversa (invertida)?",
+                opciones: ["5:7", "7:12", "12:7", "5:12"],
+                respuesta: 0,
+                explicacion: "La razón inversa simplemente invierte el orden: de 7:5 a 5:7"
+            },
+            {
+                numero: 11,
+                pregunta: "¿Qué porcentaje representa 3/4?",
+                opciones: ["75%", "60%", "80%", "70%"],
+                respuesta: 0,
+                explicacion: "3/4 = 0.75 = 75%"
+            },
+            {
+                numero: 12,
+                pregunta: "Un producto aumentó de $500 a $750. ¿Cuál fue el porcentaje de aumento?",
+                opciones: ["50%", "40%", "60%", "55%"],
+                respuesta: 0,
+                explicacion: "Aumento: 750 - 500 = 250. (250 ÷ 500) × 100 = 50%"
+            },
+            {
+                numero: 13,
+                pregunta: "Si 2x + 8 = 20, ¿cuál es el valor de x?",
+                opciones: ["6", "8", "4", "5"],
+                respuesta: 0,
+                explicacion: "2x + 8 = 20 → 2x = 12 → x = 6"
+            },
+            {
+                numero: 14,
+                pregunta: "En una proporción, si 3/5 = x/15, ¿cuál es el valor de x?",
+                opciones: ["9", "12", "10", "8"],
+                respuesta: 0,
+                explicacion: "3/5 = x/15 → x = (3 × 15) ÷ 5 = 45 ÷ 5 = 9"
+            },
+            {
+                numero: 15,
+                pregunta: "El 15% del 20% de 1000 es:",
+                opciones: ["30", "20", "25", "35"],
+                respuesta: 0,
+                explicacion: "20% de 1000 = 200. 15% de 200 = 30"
+            },
+            {
+                numero: 16,
+                pregunta: "¿Qué expresión algebraica representa 'el triple de un número más la mitad de otro número'?",
+                opciones: ["3x + y/2", "3x + 2y", "3(x + y/2)", "3x + y"],
+                respuesta: 0,
+                explicacion: "Triple de x = 3x. Mitad de y = y/2. Juntos: 3x + y/2"
+            },
+            {
+                numero: 17,
+                pregunta: "Si la razón de gatos a perros es 4:7 y hay 28 perros, ¿cuántos gatos hay?",
+                opciones: ["16", "24", "12", "20"],
+                respuesta: 0,
+                explicacion: "4:7 = x:28 → x = (4 × 28) ÷ 7 = 112 ÷ 7 = 16"
+            },
+            {
+                numero: 18,
+                pregunta: "Un pantalón cuesta $12000 con un 30% de descuento. ¿Cuál es el precio final?",
+                opciones: ["$8400", "$9000", "$7800", "$8600"],
+                respuesta: 0,
+                explicacion: "30% de 12000 = 3600. Precio final: 12000 - 3600 = $8400"
+            },
+            {
+                numero: 19,
+                pregunta: "Si x = 3, ¿cuál es el valor de (2x + 5)²?",
+                opciones: ["121", "100", "144", "169"],
+                respuesta: 0,
+                explicacion: "(2(3) + 5)² = (6 + 5)² = 11² = 121"
+            },
+            {
+                numero: 20,
+                pregunta: "¿Cuál es la expresión que representa 'un número aumentado en su 20%'?",
+                opciones: ["x + 0.2x", "x + 20", "x + 20x", "1.2x"],
+                respuesta: 0,
+                explicacion: "Un número es x. Su 20% es 0.2x. Aumentado: x + 0.2x (también igual a 1.2x)"
+            }
+        ];
+
+        // Crear preguntas con opciones barajeadas
+        const preguntas = preguntasOriginales.map(p => 
+            crearPregunta(p.numero, p.pregunta, p.opciones, p.respuesta, p.explicacion)
+        );
+
+        let preguntaActual = 0;
+        let respuestas = new Array(preguntas.length).fill(null);
+        let soundEnabled = true;
+
+        function inicializar() {
+            mostrarPregunta(0);
+        }
+
+        function mostrarPregunta(indice) {
+            const pregunta = preguntas[indice];
+            let html = `
+                <div class="quiz-number">Pregunta ${pregunta.numero} de 20</div>
+                <h3>${pregunta.pregunta}</h3>
+                <div class="options">
+            `;
+
+            pregunta.opciones.forEach((opcion, idx) => {
+                const isSelected = respuestas[indice] === idx;
+                html += `
+                    <label class="option ${isSelected ? 'selected' : ''}">
+                        <input type="radio" name="opcion" value="${idx}" 
+                               ${isSelected ? 'checked' : ''}
+                               onchange="seleccionarRespuesta(${idx})">
+                        ${opcion}
+                    </label>
+                `;
+            });
+
+            html += '</div>';
+
+            const quizContent = document.getElementById('quizContent');
+            if (quizContent) {
+                quizContent.innerHTML = html;
+            }
+            
+            preguntaActual = indice;
+            actualizarUI();
+            reproducirSonido('popup');
+            window.scrollTo(0, 0);
+        }
+
+        function seleccionarRespuesta(idx) {
+            respuestas[preguntaActual] = idx;
+            actualizarUI();
+            reproducirSonido('click');
+        }
+
+        function siguientePregunta() {
+            if (preguntaActual < preguntas.length - 1) {
+                mostrarPregunta(preguntaActual + 1);
+            } else {
+                mostrarResultados();
+            }
+        }
+
+        function preguntaAnterior() {
+            if (preguntaActual > 0) {
+                mostrarPregunta(preguntaActual - 1);
+            }
+        }
+
+        function actualizarUI() {
+            const progress = ((preguntaActual + 1) / preguntas.length) * 100;
+            const progressFill = document.getElementById('progressFill');
+            if (progressFill) {
+                progressFill.style.width = progress + '%';
+            }
+            
+            const progressText = document.getElementById('progressText');
+            if (progressText) {
+                progressText.textContent = `Pregunta ${preguntaActual + 1} de ${preguntas.length}`;
+            }
+            
+            const respondidas = respuestas.filter(r => r !== null).length;
+            const questionCounter = document.getElementById('questionCounter');
+            if (questionCounter) {
+                questionCounter.textContent = `Preguntas respondidas: ${respondidas}/${preguntas.length}`;
+            }
+
+            const prevBtn = document.getElementById('prevBtn');
+            if (prevBtn) {
+                prevBtn.disabled = preguntaActual === 0;
+            }
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                if (preguntaActual === preguntas.length - 1) {
+                    nextBtn.textContent = 'Ver Resultados 🏆';
+                } else {
+                    nextBtn.textContent = 'Siguiente →';
+                }
+            }
+        }
+
+        function mostrarResultados() {
+            let correctas = 0;
+            const resultsList = [];
+
+            respuestas.forEach((respuesta, idx) => {
+                if (respuesta === preguntas[idx].respuesta) {
+                    correctas++;
+                    resultsList.push({
+                        numero: preguntas[idx].numero,
+                        pregunta: preguntas[idx].pregunta,
+                        correcta: true,
+                        explicacion: preguntas[idx].explicacion
+                    });
+                } else {
+                    resultsList.push({
+                        numero: preguntas[idx].numero,
+                        pregunta: preguntas[idx].pregunta,
+                        correcta: false,
+                        respuestaEstudiante: respuesta !== null ? preguntas[idx].opciones[respuesta] : 'Sin responder',
+                        respuestaCorrecta: preguntas[idx].opciones[preguntas[idx].respuesta],
+                        explicacion: preguntas[idx].explicacion
+                    });
+                }
+            });
+
+            const porcentaje = (correctas / preguntas.length) * 100;
+            let emoji = '';
+            let mensaje = '';
+
+            if (porcentaje === 100) {
+                emoji = '🌟';
+                mensaje = '¡PERFECTO! ¡ERES UN MATEMÁTICO EXTRAORDINARIO! 🎓<br>Dominaste todos los conceptos. ¡Excelente desempeño!';
+            } else if (porcentaje >= 90) {
+                emoji = '🏆';
+                mensaje = '¡EXCELENTE! ¡Muy pocas fallas!<br>Dominas muy bien los temas. Sigue así.';
+            } else if (porcentaje >= 80) {
+                emoji = '🚀';
+                mensaje = '¡BIEN HECHO! Buen nivel de comprensión.<br>Repasa los temas donde fallaste.';
+            } else if (porcentaje >= 70) {
+                emoji = '👍';
+                mensaje = 'Resultado aceptable. Necesitas más práctica.<br>Revisa los conceptos con atención.';
+            } else if (porcentaje >= 60) {
+                emoji = '💪';
+                mensaje = 'Tienes una base, pero hay mucho por mejorar.<br>Estudia más los temas.';
+            } else {
+                emoji = '📚';
+                mensaje = 'Necesitas dedicar más tiempo al estudio.<br>Vuelve a repasar los temas desde el inicio.';
+            }
+
+            const resultsEmoji = document.getElementById('resultsEmoji');
+            if (resultsEmoji) {
+                resultsEmoji.textContent = emoji;
+            }
+
+            const resultsScore = document.getElementById('resultsScore');
+            if (resultsScore) {
+                resultsScore.textContent = `${correctas}/20`;
+            }
+
+            const resultsPercentage = document.getElementById('resultsPercentage');
+            if (resultsPercentage) {
+                resultsPercentage.textContent = `${porcentaje.toFixed(1)}%`;
+            }
+
+            const resultsMessage = document.getElementById('resultsMessage');
+            if (resultsMessage) {
+                resultsMessage.innerHTML = mensaje;
+            }
+
+            let resultsList_html = '';
+            resultsList.forEach(item => {
+                if (item.correcta) {
+                    resultsList_html += `
+                        <div class="result-item correct">
+                            <div class="result-item-title">✅ Pregunta ${item.numero}: CORRECTA</div>
+                            <div class="result-item-answer"><strong>Explicación:</strong> ${item.explicacion}</div>
+                        </div>
+                    `;
+                } else {
+                    resultsList_html += `
+                        <div class="result-item incorrect">
+                            <div class="result-item-title">❌ Pregunta ${item.numero}: INCORRECTA</div>
+                            <div class="result-item-answer">
+                                <strong>Tu respuesta:</strong> ${item.respuestaEstudiante}<br>
+                                <strong>Respuesta correcta:</strong> ${item.respuestaCorrecta}<br>
+                                <strong>Explicación:</strong> ${item.explicacion}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            const resultsList_div = document.getElementById('resultsList');
+            if (resultsList_div) {
+                resultsList_div.innerHTML = resultsList_html;
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            if (resultsContainer) {
+                resultsContainer.classList.add('show');
+            }
+
+            const quizContainer = document.getElementById('quizContainer');
+            if (quizContainer) {
+                quizContainer.style.display = 'none';
+            }
+
+            reproducirSonido('complete');
+            window.scrollTo(0, 0);
+        }
+
+        function reiniciarQuiz() {
+            preguntaActual = 0;
+            respuestas = new Array(preguntas.length).fill(null);
+            
+            const quizContainer = document.getElementById('quizContainer');
+            if (quizContainer) {
+                quizContainer.style.display = 'block';
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            if (resultsContainer) {
+                resultsContainer.classList.remove('show');
+            }
+
+            mostrarPregunta(0);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            if (btn) {
+                if (soundEnabled) {
+                    btn.classList.remove('off');
+                    btn.textContent = '🔊';
+                } else {
+                    btn.classList.add('off');
+                    btn.textContent = '🔇';
+                }
+            }
+        }
+
+        function reproducirSonido(tipo) {
+            if (!soundEnabled) return;
+
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (tipo === 'click') {
+                    reproducirBeep(audioContext, 600, 0.08);
+                } else if (tipo === 'popup') {
+                    reproducirBeep(audioContext, 800, 0.1);
+                } else if (tipo === 'complete') {
+                    const notas = [600, 800, 1000, 1200];
+                    notas.forEach((freq, idx) => {
+                        setTimeout(() => reproducirBeep(audioContext, freq, 0.12), idx * 100);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio no disponible');
+            }
+        }
+
+        function reproducirBeep(audioContext, freq, duration) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + duration);
+        }
+
+        // Iniciar
+        inicializar();
+    </script>
+</body>
+</html>
